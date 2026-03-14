@@ -3,179 +3,192 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦞 龍蝦 Board</title>
+<title>🦞 Lobster Board</title>
 <style>
-  :root {
-    --bg:       #1a1a2e;
-    --surface:  #16213e;
-    --card:     #0f3460;
-    --accent:   #e94560;
-    --text:     #eaeaea;
-    --muted:    #8892a4;
-    --border:   #2a3a5c;
-    --success:  #2ecc71;
-    --warning:  #f39c12;
-    --danger:   #e74c3c;
-    --purple:   #9b59b6;
-    --blue:     #3498db;
-    --green:    #27ae60;
-    --gray:     #7f8c8d;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+:root {
+  --bg:      #0d1117;
+  --surface: #161b22;
+  --card:    #21262d;
+  --border:  #30363d;
+  --accent:  #58a6ff;
+  --accent2: #f78166;
+  --text:    #e6edf3;
+  --muted:   #8b949e;
+  --success: #3fb950;
+  --warning: #d29922;
+  --danger:  #f85149;
+  --purple:  #bc8cff;
+  --radius:  8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
 
-  /* ── header ── */
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
-  header h1 { font-size: 1.3rem; }
-  .tabs { display: flex; gap: 4px; margin-left: auto; }
-  .tab { padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; background: transparent; color: var(--muted); transition: all .2s; }
-  .tab.active { background: var(--accent); color: #fff; }
-  .tab:hover:not(.active) { background: var(--border); color: var(--text); }
+/* ── top bar ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:20px;height:52px;position:sticky;top:0;z-index:50}
+.logo{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.logo span{color:var(--accent)}
+.nav-tabs{display:flex;gap:2px;margin-left:auto}
+.nav-tab{padding:6px 16px;border-radius:6px;border:none;cursor:pointer;font-size:0.85rem;font-weight:500;background:transparent;color:var(--muted);transition:all .15s}
+.nav-tab.active{background:var(--accent);color:#fff}
+.nav-tab:hover:not(.active){background:var(--border);color:var(--text)}
 
-  /* ── views ── */
-  .view { display: none; padding: 20px 24px; }
-  .view.active { display: block; }
+/* ── views ── */
+.view{display:none;padding:20px 24px;min-height:calc(100vh - 52px)}
+.view.active{display:block}
 
-  /* ── kanban ── */
-  .kanban-board { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 16px; min-height: calc(100vh - 130px); }
-  .column { flex: 0 0 280px; background: var(--surface); border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; max-height: calc(100vh - 130px); }
-  .col-header { padding: 12px 16px; font-weight: 600; font-size: 0.95rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .col-count { background: var(--border); border-radius: 12px; padding: 2px 8px; font-size: 0.75rem; color: var(--muted); }
-  .col-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+/* ── toolbar ── */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.toolbar h2{font-size:1rem;font-weight:600;flex:1}
 
-  /* ── card ── */
-  .card { background: var(--card); border-radius: 8px; padding: 12px; border: 1px solid var(--border); position: relative; }
-  .card-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 8px; line-height: 1.4; }
-  .card-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-  .badge { font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
-  .badge.high   { background: #4a1020; color: #e94560; }
-  .badge.medium { background: #4a3a10; color: #f39c12; }
-  .badge.low    { background: #0a3a20; color: #2ecc71; }
-  .badge.points { background: var(--border); color: var(--muted); }
-  .label-chip { font-size: 0.65rem; padding: 2px 6px; border-radius: 8px; }
-  .card-actions { display: flex; gap: 4px; margin-top: 10px; }
-  .btn-move { background: var(--border); border: none; color: var(--muted); border-radius: 4px; padding: 3px 8px; cursor: pointer; font-size: 0.75rem; transition: all .2s; }
-  .btn-move:hover { background: var(--accent); color: #fff; }
-  .btn-del { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 0.8rem; position: absolute; top: 8px; right: 8px; opacity: 0.5; }
-  .btn-del:hover { opacity: 1; color: var(--danger); }
+/* ── kanban ── */
+.kanban-wrap{display:flex;gap:14px;overflow-x:auto;padding-bottom:20px;align-items:flex-start}
+.col{flex:0 0 272px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);display:flex;flex-direction:column;max-height:calc(100vh - 130px)}
+.col-head{padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);border-radius:var(--radius) var(--radius) 0 0}
+.col-dot{width:10px;height:10px;border-radius:50%}
+.col-title{font-size:0.82rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;flex:1}
+.col-count{font-size:0.75rem;background:var(--border);color:var(--muted);border-radius:10px;padding:1px 7px}
+.col-body{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.col-foot{padding:8px 10px;border-top:1px solid var(--border)}
 
-  /* ── add card ── */
-  .add-card-btn { margin: 12px; padding: 8px; border: 1px dashed var(--border); background: transparent; color: var(--muted); border-radius: 6px; cursor: pointer; font-size: 0.85rem; width: calc(100% - 24px); transition: all .2s; }
-  .add-card-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* ── card ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:default;transition:border-color .15s;position:relative}
+.card:hover{border-color:var(--accent)}
+.card-type{font-size:0.68rem;color:var(--muted);margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.card-title{font-size:0.88rem;font-weight:500;line-height:1.4;margin-bottom:8px}
+.card-footer{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.badge{font-size:0.68rem;padding:2px 7px;border-radius:10px;font-weight:600;border:1px solid transparent}
+.badge.p-high{background:#3d1a1a;border-color:#f85149;color:#f85149}
+.badge.p-medium{background:#3d2e0d;border-color:#d29922;color:#d29922}
+.badge.p-low{background:#0d2e18;border-color:#3fb950;color:#3fb950}
+.badge.pts{background:var(--border);color:var(--muted);border:none}
+.label-chip{font-size:0.67rem;padding:1px 6px;border-radius:8px}
+.card-actions{display:flex;gap:4px;margin-top:8px}
+.btn-arrow{background:var(--border);border:none;color:var(--muted);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:0.78rem;transition:all .15s}
+.btn-arrow:hover{background:var(--accent);color:#fff}
+.btn-x{position:absolute;top:8px;right:8px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:0.75rem;opacity:0;transition:opacity .15s;padding:2px 4px;border-radius:3px}
+.card:hover .btn-x{opacity:1}
+.btn-x:hover{color:var(--danger);background:rgba(248,81,73,.15)}
+.add-btn{width:100%;padding:7px;border:1px dashed var(--border);background:transparent;color:var(--muted);border-radius:6px;cursor:pointer;font-size:0.82rem;transition:all .15s;text-align:left}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+.empty-col{color:var(--muted);font-size:0.8rem;text-align:center;padding:16px 0;opacity:.6}
 
-  /* ── scrum ── */
-  .sprint-header { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  .sprint-info { flex: 1; }
-  .sprint-info h3 { font-size: 1rem; margin-bottom: 4px; }
-  .sprint-info p  { color: var(--muted); font-size: 0.85rem; }
-  .sprint-progress { display: flex; align-items: center; gap: 10px; }
-  .progress-bar { width: 160px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--success); border-radius: 4px; transition: width .4s; }
-  .progress-text { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
-  .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all .2s; }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { filter: brightness(1.1); }
-  .btn-secondary { background: var(--border); color: var(--text); }
-  .btn-secondary:hover { background: var(--card); }
-  .btn-success { background: var(--success); color: #fff; }
-  .btn-success:hover { filter: brightness(1.1); }
-  .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
-  .no-sprint { text-align: center; color: var(--muted); padding: 60px 0; }
-  .no-sprint p { margin-bottom: 16px; font-size: 1rem; }
+/* ── scrum ── */
+.sprint-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.sprint-info h3{font-size:1rem;font-weight:600;margin-bottom:3px}
+.sprint-info p{color:var(--muted);font-size:0.82rem}
+.sprint-info{flex:1;min-width:200px}
+.sprint-stats{display:flex;align-items:center;gap:12px}
+.pbar-wrap{display:flex;align-items:center;gap:8px}
+.pbar{width:140px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.pbar-fill{height:100%;background:var(--success);border-radius:3px;transition:width .4s}
+.pbar-txt{font-size:0.78rem;color:var(--muted);white-space:nowrap}
+.no-sprint{text-align:center;padding:60px 20px;color:var(--muted)}
+.no-sprint p{margin-bottom:16px;font-size:.95rem}
 
-  /* scrum board inside sprint */
-  .scrum-board { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 16px; }
-  .scrum-board .column { flex: 0 0 240px; }
+/* ── burndown ── */
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-top:18px}
+.chart-card h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:12px}
+svg.bd{width:100%;height:180px}
 
-  /* backlog section */
-  .backlog-section { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 16px 20px; margin-top: 20px; }
-  .backlog-section h3 { font-size: 0.95rem; margin-bottom: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: 0.8rem; }
-  .backlog-list { display: flex; flex-direction: column; gap: 8px; }
-  .backlog-item { background: var(--card); border-radius: 6px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); }
-  .backlog-item .title { flex: 1; font-size: 0.88rem; }
-  .btn-add-sprint { background: var(--border); border: none; color: var(--text); border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; }
-  .btn-add-sprint:hover { background: var(--blue); color: #fff; }
+/* backlog */
+.backlog-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-top:18px}
+.backlog-card h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:12px}
+.bl-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:7px}
+.bl-item:last-child{margin-bottom:0}
+.bl-title{flex:1;font-size:.86rem}
+.btn-to-sprint{background:var(--border);border:none;color:var(--text);border-radius:4px;padding:3px 9px;cursor:pointer;font-size:.75rem;white-space:nowrap;transition:all .15s}
+.btn-to-sprint:hover{background:var(--accent);color:#fff}
 
-  /* burndown */
-  .burndown-section { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 16px 20px; margin-top: 20px; }
-  .burndown-section h3 { font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .05em; font-size: 0.8rem; }
-  svg.burndown { width: 100%; height: 200px; }
+/* ── buttons ── */
+.btn{padding:7px 14px;border-radius:6px;border:none;cursor:pointer;font-size:.82rem;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover{background:var(--border)}
+.btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-sm{padding:4px 10px;font-size:.75rem}
 
-  /* ── modal ── */
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; justify-content: center; align-items: center; }
-  .modal-bg.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
-  .modal h2 { font-size: 1.1rem; margin-bottom: 20px; }
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 5px; }
-  .form-group input, .form-group textarea, .form-group select {
-    width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
-    color: var(--text); padding: 8px 12px; font-size: 0.88rem; outline: none;
-  }
-  .form-group textarea { resize: vertical; min-height: 70px; }
-  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
-  .label-checks { display: flex; flex-wrap: wrap; gap: 8px; }
-  .label-check { display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.82rem; }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+/* ── modal ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;justify-content:center;align-items:center;backdrop-filter:blur(2px)}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:500px;max-width:95vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-head h2{font-size:1rem;font-weight:600}
+.modal-close{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:2px 6px;border-radius:4px}
+.modal-close:hover{color:var(--text);background:var(--border)}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:5px;font-weight:500}
+.fg input,.fg textarea,.fg select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 11px;font-size:.85rem;outline:none;font-family:inherit}
+.fg textarea{resize:vertical;min-height:65px}
+.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--accent)}
+.row-fg{display:flex;gap:12px}
+.row-fg .fg{flex:1}
+.lbl-grid{display:flex;flex-wrap:wrap;gap:7px}
+.lbl-opt{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:.8rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);transition:all .15s;user-select:none}
+.lbl-opt:hover{border-color:var(--accent)}
+.lbl-opt input{display:none}
+.lbl-opt.checked{border-color:currentColor;background:rgba(255,255,255,.06)}
+.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
 
-  /* ── util ── */
-  .empty { color: var(--muted); font-size: 0.82rem; text-align: center; padding: 20px 0; }
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>🦞 龍蝦 Board</h1>
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('kanban')">📋 Kanban</button>
-    <button class="tab" onclick="switchTab('scrum')">🏃 Scrum</button>
+<div class="topbar">
+  <div class="logo">🦞 <span>Lobster</span> Board</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('kanban')">📋 Kanban</button>
+    <button class="nav-tab" onclick="switchTab('scrum')">🏃 Scrum</button>
   </div>
-</header>
+</div>
 
-<!-- ═══════════════════ KANBAN ═══════════════════ -->
+<!-- KANBAN -->
 <div id="view-kanban" class="view active">
-  <div class="kanban-board" id="kanban-board"></div>
+  <div class="toolbar">
+    <h2>Kanban Board</h2>
+    <button class="btn btn-primary" onclick="openCardModal(null,null)">＋ 新增卡片</button>
+  </div>
+  <div class="kanban-wrap" id="kanban-wrap"></div>
 </div>
 
-<!-- ═══════════════════ SCRUM ═══════════════════ -->
+<!-- SCRUM -->
 <div id="view-scrum" class="view">
-  <div id="sprint-area"></div>
-  <div class="backlog-section">
-    <h3>📥 Backlog（點擊加入 Sprint）</h3>
-    <div class="backlog-list" id="backlog-list"></div>
-    <button class="add-card-btn" style="margin:12px 0 0" onclick="openModal(null, null)">＋ 新增 Story / Task</button>
+  <div class="toolbar">
+    <h2>Scrum Board</h2>
+    <button class="btn btn-primary" onclick="openSprintModal()">＋ 新增 Sprint</button>
+  </div>
+  <div id="scrum-area"></div>
+  <div class="backlog-card">
+    <h3>📥 Product Backlog</h3>
+    <div id="backlog-list"></div>
+    <button class="add-btn" style="margin-top:8px" onclick="openCardModal('backlog',null)">＋ 新增 Story / Task</button>
   </div>
 </div>
 
-<!-- ═══════════════════ MODAL ═══════════════════ -->
-<div class="modal-bg" id="modal-bg" onclick="closeModalBg(event)">
+<!-- CARD MODAL -->
+<div class="overlay" id="card-overlay" onclick="closeOverlay('card-overlay',event)">
   <div class="modal">
-    <h2 id="modal-title">新增卡片</h2>
-    <div class="form-group">
-      <label>標題 *</label>
-      <input id="f-title" placeholder="Story / task 標題">
+    <div class="modal-head">
+      <h2 id="card-modal-title">新增卡片</h2>
+      <button class="modal-close" onclick="closeOverlay('card-overlay')">✕</button>
     </div>
-    <div class="form-group">
-      <label>描述</label>
-      <textarea id="f-desc" placeholder="詳細說明..."></textarea>
-    </div>
-    <div class="form-group">
-      <label>類型</label>
-      <select id="f-type">
-        <option value="story">📖 Story</option>
-        <option value="task">✅ Task</option>
-        <option value="bug">🐛 Bug</option>
-      </select>
-    </div>
-    <div class="form-group" style="display:flex;gap:12px">
-      <div style="flex:1">
-        <label>Story Points</label>
-        <input id="f-points" type="number" min="0" max="100" value="0">
+    <div class="fg"><label>標題 *</label><input id="f-title" placeholder="Story / task 標題..."></div>
+    <div class="fg"><label>描述</label><textarea id="f-desc" placeholder="詳細說明..."></textarea></div>
+    <div class="row-fg">
+      <div class="fg">
+        <label>類型</label>
+        <select id="f-type">
+          <option value="story">📖 Story</option>
+          <option value="task">✅ Task</option>
+          <option value="bug">🐛 Bug</option>
+        </select>
       </div>
-      <div style="flex:1">
+      <div class="fg">
         <label>優先度</label>
         <select id="f-priority">
           <option value="high">🔴 高</option>
@@ -183,37 +196,35 @@
           <option value="low">🟢 低</option>
         </select>
       </div>
+      <div class="fg">
+        <label>Story Points</label>
+        <input id="f-pts" type="number" min="0" max="99" value="0">
+      </div>
     </div>
-    <div class="form-group">
-      <label>Labels</label>
-      <div class="label-checks" id="label-checks"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <div class="fg"><label>Labels</label><div class="lbl-grid" id="lbl-grid"></div></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeOverlay('card-overlay')">取消</button>
       <button class="btn btn-primary" onclick="submitCard()">新增</button>
     </div>
   </div>
 </div>
 
-<!-- Sprint Modal -->
-<div class="modal-bg" id="sprint-modal-bg" onclick="closeSprintModalBg(event)">
+<!-- SPRINT MODAL -->
+<div class="overlay" id="sprint-overlay" onclick="closeOverlay('sprint-overlay',event)">
   <div class="modal">
-    <h2>建立 Sprint</h2>
-    <div class="form-group">
-      <label>Sprint 名稱</label>
-      <input id="sf-name" placeholder="e.g. Sprint 1">
+    <div class="modal-head">
+      <h2>建立 Sprint</h2>
+      <button class="modal-close" onclick="closeOverlay('sprint-overlay')">✕</button>
     </div>
-    <div class="form-group">
-      <label>目標</label>
-      <textarea id="sf-goal" placeholder="這個 sprint 要達成什麼？"></textarea>
+    <div class="fg"><label>Sprint 名稱</label><input id="sf-name" placeholder="Sprint 1"></div>
+    <div class="fg"><label>Sprint 目標</label><textarea id="sf-goal" placeholder="這個 Sprint 要達成什麼？"></textarea></div>
+    <div class="row-fg">
+      <div class="fg"><label>開始日期</label><input id="sf-start" type="date"></div>
+      <div class="fg"><label>結束日期</label><input id="sf-end" type="date"></div>
     </div>
-    <div class="form-group" style="display:flex;gap:12px">
-      <div style="flex:1"><label>開始日期</label><input id="sf-start" type="date"></div>
-      <div style="flex:1"><label>結束日期</label><input id="sf-end" type="date"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeSprintModal()">取消</button>
-      <button class="btn btn-primary" onclick="submitSprint()">建立</button>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeOverlay('sprint-overlay')">取消</button>
+      <button class="btn btn-primary" onclick="submitSprint()">建立並開始</button>
     </div>
   </div>
 </div>
@@ -222,375 +233,301 @@
 const API = 'https://192.168.1.101:3333/api';
 
 const LABELS = [
-  { id: 'cloud',   name: 'Cloud/BMC', color: '#3b82f6' },
-  { id: 'ai',      name: 'AI',        color: '#8b5cf6' },
-  { id: 'infra',   name: 'Infra',     color: '#10b981' },
-  { id: 'bug',     name: 'Bug',       color: '#ef4444' },
-  { id: 'feature', name: 'Feature',   color: '#f59e0b' },
-  { id: 'chore',   name: 'Chore',     color: '#6b7280' },
+  {id:'cloud',  name:'Cloud/BMC', color:'#58a6ff'},
+  {id:'ai',     name:'AI',        color:'#bc8cff'},
+  {id:'infra',  name:'Infra',     color:'#3fb950'},
+  {id:'bug',    name:'Bug',       color:'#f85149'},
+  {id:'feature',name:'Feature',   color:'#d29922'},
+  {id:'chore',  name:'Chore',     color:'#8b949e'},
 ];
 
-const KANBAN_COLS = [
-  { id: 'backlog',     title: '📥 Backlog' },
-  { id: 'todo',        title: '📋 To Do' },
-  { id: 'in_progress', title: '⚙️ In Progress' },
-  { id: 'review',      title: '👀 Review' },
-  { id: 'done',        title: '✅ Done' },
+const KCOLS = [
+  {id:'backlog',     title:'Backlog',     dot:'#8b949e'},
+  {id:'todo',        title:'To Do',       dot:'#58a6ff'},
+  {id:'in_progress', title:'In Progress', dot:'#d29922'},
+  {id:'review',      title:'Review',      dot:'#bc8cff'},
+  {id:'done',        title:'Done',        dot:'#3fb950'},
 ];
-const KANBAN_ORDER = KANBAN_COLS.map(c => c.id);
+const KORDER = KCOLS.map(c=>c.id);
 
-const SCRUM_COLS = [
-  { id: 's_todo',        title: 'To Do' },
-  { id: 's_in_progress', title: 'In Progress' },
-  { id: 's_review',      title: 'In Review' },
-  { id: 's_done',        title: '✅ Done' },
+const SCOLS = [
+  {id:'s_todo',        title:'To Do'},
+  {id:'s_in_progress', title:'In Progress'},
+  {id:'s_review',      title:'In Review'},
+  {id:'s_done',        title:'Done ✅'},
 ];
-const SCRUM_ORDER = SCRUM_COLS.map(c => c.id);
+const SORDER = SCOLS.map(c=>c.id);
 
-let board = { cards: [], sprints: [], labels: LABELS };
-let modalContext = null; // { targetCol, sprintId }
+let B = {cards:[],sprints:[]};
+let _ctx = {};
 
-// ── API ──────────────────────────────────────────────────────────────────────
-async function api(path, method = 'GET', body) {
-  const r = await fetch(API + path, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!r.ok) throw new Error(await r.text());
+async function api(path,method='GET',body){
+  const r = await fetch(API+path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  if(!r.ok) throw new Error(await r.text());
   return r.json();
 }
 
-async function loadBoard() {
-  try {
-    board = await api('/board');
-  } catch(e) {
-    console.warn('Board API not available, using empty state:', e.message);
-  }
+async function load(){
+  try{ B = await api('/board'); } catch(e){ console.warn('API error:',e.message); }
   render();
 }
 
-// ── tabs ─────────────────────────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => {
-    if (t.textContent.toLowerCase().includes(name === 'kanban' ? 'kanban' : 'scrum'))
-      t.classList.add('active');
+function switchTab(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.nav-tab')[name==='kanban'?0:1].classList.add('active');
+  render();
+}
+
+function render(){
+  const a = document.querySelector('.view.active').id;
+  if(a==='view-kanban') renderKanban();
+  if(a==='view-scrum')  renderScrum();
+}
+
+/* ── kanban ── */
+function renderKanban(){
+  const wrap = document.getElementById('kanban-wrap');
+  wrap.innerHTML='';
+  KCOLS.forEach(col=>{
+    const cards = B.cards.filter(c=>c.kanban_column===col.id);
+    const div = document.createElement('div');
+    div.className='col';
+    div.innerHTML=`
+      <div class="col-head">
+        <div class="col-dot" style="background:${col.dot}"></div>
+        <span class="col-title">${col.title}</span>
+        <span class="col-count">${cards.length}</span>
+      </div>
+      <div class="col-body" id="kb-${col.id}"></div>
+      <div class="col-foot">
+        <button class="add-btn" onclick="openCardModal('${col.id}',null)">＋ 新增</button>
+      </div>`;
+    const body = div.querySelector('.col-body');
+    if(!cards.length) body.innerHTML='<div class="empty-col">沒有卡片</div>';
+    cards.forEach(c=>body.appendChild(mkCard(c,'kanban')));
+    wrap.appendChild(div);
   });
-  render();
 }
 
-// ── render ───────────────────────────────────────────────────────────────────
-function render() {
-  const active = document.querySelector('.view.active').id;
-  if (active === 'view-kanban') renderKanban();
-  if (active === 'view-scrum')  renderScrum();
-}
-
-// ── kanban ───────────────────────────────────────────────────────────────────
-function renderKanban() {
-  const el = document.getElementById('kanban-board');
-  el.innerHTML = '';
-  for (const col of KANBAN_COLS) {
-    const cards = board.cards.filter(c => c.kanban_column === col.id);
-    el.appendChild(makeKanbanCol(col, cards));
-  }
-}
-
-function makeKanbanCol(col, cards) {
-  const div = document.createElement('div');
-  div.className = 'column';
-  div.innerHTML = `
-    <div class="col-header">
-      <span>${col.title}</span>
-      <span class="col-count">${cards.length}</span>
-    </div>
-    <div class="col-body" id="col-${col.id}">
-      ${cards.length === 0 ? '<div class="empty">空的</div>' : ''}
-    </div>
-    <button class="add-card-btn" onclick="openModal('${col.id}', null)">＋ 新增卡片</button>
-  `;
-  const body = div.querySelector('.col-body');
-  cards.forEach(card => body.appendChild(makeCard(card, 'kanban')));
-  return div;
-}
-
-function makeCard(card, mode) {
-  const div = document.createElement('div');
-  div.className = 'card';
-
-  const labelHtml = (card.labels || []).map(lid => {
-    const l = LABELS.find(x => x.id === lid);
-    return l ? `<span class="label-chip" style="background:${l.color}22;color:${l.color}">${l.name}</span>` : '';
+/* ── card ── */
+function mkCard(c,mode){
+  const div=document.createElement('div');
+  div.className='card';
+  const typeIcon={story:'📖',task:'✅',bug:'🐛'}[c.type||'story']||'📖';
+  const priBadge=`<span class="badge p-${c.priority||'medium'}">${{high:'🔴 高',medium:'🟡 中',low:'🟢 低'}[c.priority||'medium']}</span>`;
+  const ptsBadge=c.story_points?`<span class="badge pts">${c.story_points} pts</span>`:'';
+  const lbls=(c.labels||[]).map(lid=>{
+    const l=LABELS.find(x=>x.id===lid);
+    return l?`<span class="label-chip" style="background:${l.color}22;color:${l.color};border:1px solid ${l.color}44">${l.name}</span>`:'';
   }).join('');
-
-  const priorityLabel = { high: '🔴 高', medium: '🟡 中', low: '🟢 低' }[card.priority] || '🟡 中';
-
-  let moveHtml = '';
-  if (mode === 'kanban') {
-    const idx = KANBAN_ORDER.indexOf(card.kanban_column);
-    if (idx > 0)
-      moveHtml += `<button class="btn-move" onclick="moveCard('${card.id}','kanban','${KANBAN_ORDER[idx-1]}')">◀</button>`;
-    if (idx < KANBAN_ORDER.length - 1)
-      moveHtml += `<button class="btn-move" onclick="moveCard('${card.id}','kanban','${KANBAN_ORDER[idx+1]}')">▶</button>`;
+  let arrows='';
+  if(mode==='kanban'){
+    const i=KORDER.indexOf(c.kanban_column);
+    if(i>0) arrows+=`<button class="btn-arrow" onclick="moveCard('${c.id}','kanban','${KORDER[i-1]}')">◀</button>`;
+    if(i<KORDER.length-1) arrows+=`<button class="btn-arrow" onclick="moveCard('${c.id}','kanban','${KORDER[i+1]}')">▶</button>`;
   } else {
-    const idx = SCRUM_ORDER.indexOf(card.scrum_column);
-    if (idx > 0)
-      moveHtml += `<button class="btn-move" onclick="moveCard('${card.id}','scrum','${SCRUM_ORDER[idx-1]}')">◀</button>`;
-    if (idx < SCRUM_ORDER.length - 1)
-      moveHtml += `<button class="btn-move" onclick="moveCard('${card.id}','scrum','${SCRUM_ORDER[idx+1]}')">▶</button>`;
+    const i=SORDER.indexOf(c.scrum_column);
+    if(i>0) arrows+=`<button class="btn-arrow" onclick="moveCard('${c.id}','scrum','${SORDER[i-1]}')">◀</button>`;
+    if(i<SORDER.length-1) arrows+=`<button class="btn-arrow" onclick="moveCard('${c.id}','scrum','${SORDER[i+1]}')">▶</button>`;
   }
-
-  div.innerHTML = `
-    <button class="btn-del" onclick="deleteCard('${card.id}')">✕</button>
-    <div class="card-title">${esc(card.title)}</div>
-    <div class="card-meta">
-      <span class="badge ${card.priority || 'medium'}">${priorityLabel}</span>
-      ${card.story_points ? `<span class="badge points">${card.story_points} pts</span>` : ''}
-      ${labelHtml}
-    </div>
-    ${moveHtml ? `<div class="card-actions">${moveHtml}</div>` : ''}
-  `;
+  div.innerHTML=`
+    <button class="btn-x" onclick="delCard('${c.id}')">✕</button>
+    <div class="card-type">${typeIcon} ${(c.type||'story').toUpperCase()}</div>
+    <div class="card-title">${esc(c.title)}</div>
+    <div class="card-footer">${priBadge}${ptsBadge}${lbls}</div>
+    ${arrows?`<div class="card-actions">${arrows}</div>`:''}`;
   return div;
 }
 
-async function moveCard(id, mode, targetCol) {
-  const body = mode === 'kanban' ? { kanban_column: targetCol } : { scrum_column: targetCol };
-  await api('/cards/' + id + '/move', 'PATCH', body);
-  await loadBoard();
+async function moveCard(id,mode,col){
+  const body=mode==='kanban'?{kanban_column:col}:{scrum_column:col};
+  await api('/cards/'+id+'/move','PATCH',body);
+  await load();
 }
 
-async function deleteCard(id) {
-  if (!confirm('刪除這張卡片？')) return;
-  await api('/cards/' + id, 'DELETE');
-  await loadBoard();
+async function delCard(id){
+  if(!confirm('刪除這張卡片？')) return;
+  await api('/cards/'+id,'DELETE');
+  await load();
 }
 
-// ── scrum ────────────────────────────────────────────────────────────────────
-function renderScrum() {
-  const area = document.getElementById('sprint-area');
-  const activeSprint = board.sprints.find(s => s.status === 'active');
+/* ── scrum ── */
+function renderScrum(){
+  const area=document.getElementById('scrum-area');
+  const active=B.sprints.find(s=>s.status==='active');
 
-  if (!activeSprint) {
-    area.innerHTML = `
-      <div class="no-sprint">
-        <p>目前沒有進行中的 Sprint</p>
-        <button class="btn btn-primary" onclick="openSprintModal()">＋ 建立 Sprint</button>
-      </div>
-    `;
+  if(!active){
+    area.innerHTML=`<div class="no-sprint"><p>目前沒有進行中的 Sprint</p><button class="btn btn-primary" onclick="openSprintModal()">＋ 建立第一個 Sprint</button></div>`;
   } else {
-    const sprintCards = board.cards.filter(c => c.sprint_id === activeSprint.id);
-    const totalPts    = sprintCards.reduce((s, c) => s + (c.story_points || 0), 0);
-    const donePts     = sprintCards.filter(c => c.scrum_column === 's_done').reduce((s, c) => s + (c.story_points || 0), 0);
-    const pct         = totalPts ? Math.round(donePts / totalPts * 100) : 0;
-
-    area.innerHTML = `
-      <div class="sprint-header">
+    const sc=B.cards.filter(c=>c.sprint_id===active.id);
+    const tot=sc.reduce((s,c)=>s+(c.story_points||0),0);
+    const don=sc.filter(c=>c.scrum_column==='s_done').reduce((s,c)=>s+(c.story_points||0),0);
+    const pct=tot?Math.round(don/tot*100):0;
+    area.innerHTML=`
+      <div class="sprint-card">
         <div class="sprint-info">
-          <h3>${esc(activeSprint.name)}</h3>
-          <p>${esc(activeSprint.goal || '無 Sprint 目標')} &nbsp;·&nbsp; ${activeSprint.start_date} → ${activeSprint.end_date}</p>
+          <h3>${esc(active.name)}</h3>
+          <p>${esc(active.goal||'無 Sprint 目標')} · ${active.start_date} → ${active.end_date}</p>
         </div>
-        <div class="sprint-progress">
-          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <span class="progress-text">${donePts} / ${totalPts} pts</span>
+        <div class="sprint-stats">
+          <div class="pbar-wrap">
+            <div class="pbar"><div class="pbar-fill" style="width:${pct}%"></div></div>
+            <span class="pbar-txt">${don}/${tot} pts (${pct}%)</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="completeSprint('${active.id}')">完成 Sprint</button>
         </div>
-        <button class="btn btn-sm btn-secondary" onclick="completeSprint('${activeSprint.id}')">完成 Sprint</button>
       </div>
-      <div class="scrum-board" id="scrum-board"></div>
-      <div class="burndown-section">
-        <h3>📉 Burndown Chart</h3>
-        <svg class="burndown" id="burndown-svg"></svg>
-      </div>
-    `;
+      <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:12px" id="scrum-board"></div>
+      <div class="chart-card"><h3>📉 Burndown Chart</h3><svg class="bd" id="bd-svg"></svg></div>`;
 
-    const scrumBoard = document.getElementById('scrum-board');
-    for (const col of SCRUM_COLS) {
-      const cards = sprintCards.filter(c => c.scrum_column === col.id);
-      const colDiv = document.createElement('div');
-      colDiv.className = 'column';
-      colDiv.innerHTML = `
-        <div class="col-header">
-          <span>${col.title}</span>
-          <span class="col-count">${cards.length}</span>
-        </div>
-        <div class="col-body"></div>
-      `;
-      const body = colDiv.querySelector('.col-body');
-      if (cards.length === 0) body.innerHTML = '<div class="empty">空的</div>';
-      cards.forEach(c => body.appendChild(makeCard(c, 'scrum')));
-      scrumBoard.appendChild(colDiv);
-    }
-
-    drawBurndown(activeSprint, sprintCards);
+    const sb=document.getElementById('scrum-board');
+    SCOLS.forEach(col=>{
+      const cards=sc.filter(c=>c.scrum_column===col.id);
+      const d=document.createElement('div');
+      d.className='col';d.style.flex='0 0 240px';
+      d.innerHTML=`<div class="col-head"><span class="col-title">${col.title}</span><span class="col-count">${cards.length}</span></div><div class="col-body"></div>`;
+      const b=d.querySelector('.col-body');
+      if(!cards.length) b.innerHTML='<div class="empty-col">空的</div>';
+      cards.forEach(c=>b.appendChild(mkCard(c,'scrum')));
+      sb.appendChild(d);
+    });
+    drawBurndown(active,sc);
   }
 
   // backlog
-  const backlogList = document.getElementById('backlog-list');
-  const backlogCards = board.cards.filter(c => !c.sprint_id);
-  backlogList.innerHTML = '';
-  if (backlogCards.length === 0) {
-    backlogList.innerHTML = '<div class="empty">Backlog 是空的，新增一些 Story 吧！</div>';
-  } else {
-    backlogCards.forEach(c => {
-      const item = document.createElement('div');
-      item.className = 'backlog-item';
-      item.innerHTML = `
-        <span class="badge ${c.priority || 'medium'}">${{high:'🔴',medium:'🟡',low:'🟢'}[c.priority||'medium']}</span>
-        <span class="title">${esc(c.title)}</span>
-        ${c.story_points ? `<span class="badge points">${c.story_points}p</span>` : ''}
-        ${activeSprint ? `<button class="btn-add-sprint" onclick="addToSprint('${c.id}','${activeSprint.id}')">Sprint へ →</button>` : ''}
-        <button class="btn-del" style="position:static;opacity:.5" onclick="deleteCard('${c.id}')">✕</button>
-      `;
-      backlogList.appendChild(item);
-    });
+  const bl=document.getElementById('backlog-list');
+  const bCards=B.cards.filter(c=>!c.sprint_id);
+  bl.innerHTML='';
+  if(!bCards.length){bl.innerHTML='<div style="color:var(--muted);font-size:.82rem;padding:8px 0">Backlog 是空的</div>';return;}
+  bCards.forEach(c=>{
+    const active2=B.sprints.find(s=>s.status==='active');
+    const d=document.createElement('div');
+    d.className='bl-item';
+    d.innerHTML=`
+      <span class="badge p-${c.priority||'medium'}" style="flex-shrink:0">${{high:'🔴',medium:'🟡',low:'🟢'}[c.priority||'medium']}</span>
+      <span class="bl-title">${esc(c.title)}</span>
+      ${c.story_points?`<span class="badge pts">${c.story_points}p</span>`:''}
+      ${active2?`<button class="btn-to-sprint" onclick="addToSprint('${c.id}','${active2.id}')">→ Sprint</button>`:''}
+      <button class="btn-x" style="position:static;opacity:.5" onclick="delCard('${c.id}')">✕</button>`;
+    bl.appendChild(d);
+  });
+}
+
+async function addToSprint(cardId,sprintId){
+  await api('/cards/'+cardId+'/move','PATCH',{sprint_id:sprintId,scrum_column:'s_todo'});
+  await load();
+}
+
+async function completeSprint(id){
+  if(!confirm('完成 Sprint？未完成卡片回到 Backlog。')) return;
+  await api('/sprints/'+id+'/complete','POST',{});
+  await load();
+}
+
+/* ── burndown ── */
+function drawBurndown(sprint,cards){
+  const svg=document.getElementById('bd-svg');
+  if(!svg) return;
+  const W=svg.clientWidth||580,H=180;
+  const P={t:16,r:16,b:28,l:36};
+  const iW=W-P.l-P.r,iH=H-P.t-P.b;
+  const s=new Date(sprint.start_date),e=new Date(sprint.end_date);
+  const days=Math.max((e-s)/864e5,1);
+  const tot=cards.reduce((a,c)=>a+(c.story_points||0),0);
+  if(!tot){svg.innerHTML='<text x="50%" y="50%" fill="var(--muted)" text-anchor="middle" font-size="12">沒有 Story Points</text>';return;}
+  const today=new Date();
+  const elapsed=Math.min(Math.max((today-s)/864e5,0),days);
+  const don=cards.filter(c=>c.scrum_column==='s_done').reduce((a,c)=>a+(c.story_points||0),0);
+  const x=d=>P.l+(d/days)*iW;
+  const y=p=>P.t+(1-p/tot)*iH;
+  const ideal=`M${x(0)},${y(tot)} L${x(days)},${y(0)}`;
+  const actual=`M${x(0)},${y(tot)} L${x(elapsed)},${y(tot-don)}`;
+  let axisX='',axisY='';
+  const steps=Math.min(days,7);
+  for(let i=0;i<=steps;i++){
+    const d=new Date(s.getTime()+i*(days/steps)*864e5);
+    axisX+=`<text x="${x(i*(days/steps)).toFixed(1)}" y="${H-6}" fill="var(--muted)" font-size="10" text-anchor="middle">${(d.getMonth()+1)}/${d.getDate()}</text>`;
   }
+  [0,Math.round(tot/2),tot].forEach(v=>{
+    axisY+=`<text x="${P.l-5}" y="${y(v).toFixed(1)}" fill="var(--muted)" font-size="10" text-anchor="end" dominant-baseline="middle">${v}</text>
+    <line x1="${P.l}" y1="${y(v).toFixed(1)}" x2="${P.l+iW}" y2="${y(v).toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
+  });
+  svg.innerHTML=`
+    ${axisX}${axisY}
+    <path d="${ideal}" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5,3"/>
+    <path d="${actual}" fill="none" stroke="var(--accent2)" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="${x(elapsed).toFixed(1)}" cy="${y(tot-don).toFixed(1)}" r="4" fill="var(--accent2)"/>
+    <text x="${P.l+iW-4}" y="${P.t+12}" fill="var(--border)" font-size="10" text-anchor="end">── ideal</text>
+    <text x="${P.l+iW-4}" y="${P.t+24}" fill="var(--accent2)" font-size="10" text-anchor="end">── actual</text>`;
 }
 
-async function addToSprint(cardId, sprintId) {
-  await api('/cards/' + cardId + '/move', 'PATCH', { sprint_id: sprintId, scrum_column: 's_todo' });
-  await loadBoard();
-}
-
-async function completeSprint(sprintId) {
-  if (!confirm('完成這個 Sprint？未完成的卡片會移回 Backlog。')) return;
-  await api('/sprints/' + sprintId + '/complete', 'POST', {});
-  await loadBoard();
-}
-
-// ── burndown ──────────────────────────────────────────────────────────────────
-function drawBurndown(sprint, cards) {
-  const svg = document.getElementById('burndown-svg');
-  if (!svg) return;
-
-  const W = svg.clientWidth || 600, H = 200;
-  const pad = { top: 20, right: 20, bottom: 30, left: 40 };
-  const iW = W - pad.left - pad.right;
-  const iH = H - pad.top - pad.bottom;
-
-  const start = new Date(sprint.start_date);
-  const end   = new Date(sprint.end_date);
-  const days  = Math.max((end - start) / 86400000, 1);
-  const total = cards.reduce((s, c) => s + (c.story_points || 0), 0);
-  if (!total) { svg.innerHTML = '<text x="50%" y="50%" fill="#8892a4" text-anchor="middle" font-size="13">沒有 Story Points</text>'; return; }
-
-  const today = new Date();
-
-  // ideal line
-  const idealPts = [{ d: 0, p: total }, { d: days, p: 0 }];
-
-  // actual line (simplified: count done cards)
-  const donePts = cards.filter(c => c.scrum_column === 's_done').reduce((s, c) => s + (c.story_points || 0), 0);
-  const elapsed = Math.min(Math.max((today - start) / 86400000, 0), days);
-  const actualPts = [{ d: 0, p: total }, { d: elapsed, p: total - donePts }];
-
-  const x = d => pad.left + (d / days) * iW;
-  const y = p => pad.top  + (1 - p / total) * iH;
-
-  const line = pts => pts.map((pt, i) => `${i === 0 ? 'M' : 'L'}${x(pt.d).toFixed(1)},${y(pt.p).toFixed(1)}`).join(' ');
-
-  // axis labels
-  let labels = '';
-  for (let i = 0; i <= Math.min(days, 10); i++) {
-    const d = new Date(start.getTime() + i * (days / Math.min(days, 10)) * 86400000);
-    const lx = x(i * (days / Math.min(days, 10)));
-    labels += `<text x="${lx.toFixed(1)}" y="${(H - 6).toFixed(1)}" fill="#8892a4" font-size="10" text-anchor="middle">${(d.getMonth()+1)}/${d.getDate()}</text>`;
-  }
-
-  svg.innerHTML = `
-    <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top+iH}" stroke="#2a3a5c" stroke-width="1"/>
-    <line x1="${pad.left}" y1="${pad.top+iH}" x2="${pad.left+iW}" y2="${pad.top+iH}" stroke="#2a3a5c" stroke-width="1"/>
-    ${labels}
-    <text x="${(pad.left-6).toFixed(1)}" y="${y(total).toFixed(1)}" fill="#8892a4" font-size="10" text-anchor="end">${total}</text>
-    <text x="${(pad.left-6).toFixed(1)}" y="${(pad.top+iH).toFixed(1)}" fill="#8892a4" font-size="10" text-anchor="end">0</text>
-    <path d="${line(idealPts)}" fill="none" stroke="#2a3a5c" stroke-width="2" stroke-dasharray="6,3"/>
-    <path d="${line(actualPts)}" fill="none" stroke="#e94560" stroke-width="2.5"/>
-    <circle cx="${x(elapsed).toFixed(1)}" cy="${y(total-donePts).toFixed(1)}" r="4" fill="#e94560"/>
-    <text x="${(pad.left+iW-4).toFixed(1)}" y="${(pad.top+14).toFixed(1)}" fill="#2a3a5c" font-size="10" text-anchor="end">── ideal</text>
-    <text x="${(pad.left+iW-4).toFixed(1)}" y="${(pad.top+26).toFixed(1)}" fill="#e94560" font-size="10" text-anchor="end">── actual</text>
-  `;
-}
-
-// ── modal ────────────────────────────────────────────────────────────────────
-function openModal(kanbanCol, sprintId) {
-  modalContext = { kanbanCol: kanbanCol || 'backlog', sprintId };
-  document.getElementById('modal-title').textContent = '新增卡片';
-  document.getElementById('f-title').value = '';
-  document.getElementById('f-desc').value  = '';
-  document.getElementById('f-type').value  = 'story';
-  document.getElementById('f-points').value = '0';
-  document.getElementById('f-priority').value = 'medium';
-
-  const checks = document.getElementById('label-checks');
-  checks.innerHTML = LABELS.map(l =>
-    `<label class="label-check">
-      <input type="checkbox" value="${l.id}" style="accent-color:${l.color}">
-      <span class="label-chip" style="background:${l.color}22;color:${l.color}">${l.name}</span>
-    </label>`
-  ).join('');
-
-  document.getElementById('modal-bg').classList.add('open');
+/* ── card modal ── */
+function openCardModal(kanbanCol,sprintId){
+  _ctx={kanbanCol:kanbanCol||'backlog',sprintId};
+  document.getElementById('f-title').value='';
+  document.getElementById('f-desc').value='';
+  document.getElementById('f-type').value='story';
+  document.getElementById('f-pts').value='0';
+  document.getElementById('f-priority').value='medium';
+  const g=document.getElementById('lbl-grid');
+  g.innerHTML=LABELS.map(l=>`
+    <label class="lbl-opt" id="lo-${l.id}" style="color:${l.color}">
+      <input type="checkbox" value="${l.id}" onchange="toggleLbl('${l.id}')">
+      <span>${l.name}</span>
+    </label>`).join('');
+  document.getElementById('card-overlay').classList.add('open');
   document.getElementById('f-title').focus();
 }
 
-function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
-function closeModalBg(e) { if (e.target.id === 'modal-bg') closeModal(); }
-
-async function submitCard() {
-  const title = document.getElementById('f-title').value.trim();
-  if (!title) { alert('請輸入標題'); return; }
-  const labels = [...document.querySelectorAll('#label-checks input:checked')].map(i => i.value);
-  const body = {
-    title,
-    description:    document.getElementById('f-desc').value,
-    type:           document.getElementById('f-type').value,
-    story_points:   parseInt(document.getElementById('f-points').value) || 0,
-    priority:       document.getElementById('f-priority').value,
-    labels,
-    kanban_column:  modalContext.kanbanCol || 'backlog',
-    sprint_id:      modalContext.sprintId || null,
-    scrum_column:   modalContext.sprintId ? 's_todo' : 's_todo',
-  };
-  await api('/cards', 'POST', body);
-  closeModal();
-  await loadBoard();
+function toggleLbl(id){
+  const el=document.getElementById('lo-'+id);
+  el.classList.toggle('checked',el.querySelector('input').checked);
 }
 
-// ── sprint modal ──────────────────────────────────────────────────────────────
-function openSprintModal() {
-  const today = new Date().toISOString().split('T')[0];
-  const two   = new Date(Date.now() + 14*86400000).toISOString().split('T')[0];
-  document.getElementById('sf-name').value  = `Sprint ${(board.sprints.length + 1)}`;
-  document.getElementById('sf-goal').value  = '';
-  document.getElementById('sf-start').value = today;
-  document.getElementById('sf-end').value   = two;
-  document.getElementById('sprint-modal-bg').classList.add('open');
-}
-function closeSprintModal() { document.getElementById('sprint-modal-bg').classList.remove('open'); }
-function closeSprintModalBg(e) { if (e.target.id === 'sprint-modal-bg') closeSprintModal(); }
+function closeOverlay(id,e){if(!e||e.target.id===id) document.getElementById(id).classList.remove('open');}
 
-async function submitSprint() {
-  const name = document.getElementById('sf-name').value.trim();
-  if (!name) { alert('請輸入 Sprint 名稱'); return; }
-  const sprint = await api('/sprints', 'POST', {
-    name,
-    goal:       document.getElementById('sf-goal').value,
-    start_date: document.getElementById('sf-start').value,
-    end_date:   document.getElementById('sf-end').value,
+async function submitCard(){
+  const title=document.getElementById('f-title').value.trim();
+  if(!title){alert('請輸入標題');return;}
+  const labels=[...document.querySelectorAll('#lbl-grid input:checked')].map(i=>i.value);
+  await api('/cards','POST',{
+    title,description:document.getElementById('f-desc').value,
+    type:document.getElementById('f-type').value,
+    story_points:parseInt(document.getElementById('f-pts').value)||0,
+    priority:document.getElementById('f-priority').value,
+    labels,kanban_column:_ctx.kanbanCol||'backlog',
+    sprint_id:_ctx.sprintId||null,scrum_column:'s_todo',
   });
-  await api('/sprints/' + sprint.id + '/start', 'POST', {});
-  closeSprintModal();
-  await loadBoard();
+  closeOverlay('card-overlay');
+  await load();
 }
 
-// ── util ──────────────────────────────────────────────────────────────────────
-function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+/* ── sprint modal ── */
+function openSprintModal(){
+  const t=new Date().toISOString().split('T')[0];
+  const e=new Date(Date.now()+14*864e5).toISOString().split('T')[0];
+  document.getElementById('sf-name').value=`Sprint ${B.sprints.length+1}`;
+  document.getElementById('sf-goal').value='';
+  document.getElementById('sf-start').value=t;
+  document.getElementById('sf-end').value=e;
+  document.getElementById('sprint-overlay').classList.add('open');
 }
 
-// ── init ──────────────────────────────────────────────────────────────────────
-loadBoard();
+async function submitSprint(){
+  const name=document.getElementById('sf-name').value.trim();
+  if(!name){alert('請輸入名稱');return;}
+  const sp=await api('/sprints','POST',{name,goal:document.getElementById('sf-goal').value,start_date:document.getElementById('sf-start').value,end_date:document.getElementById('sf-end').value});
+  await api('/sprints/'+sp.id+'/start','POST',{});
+  closeOverlay('sprint-overlay');
+  await load();
+}
+
+/* ── util ── */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+load();
 </script>
 </body>
 </html>
