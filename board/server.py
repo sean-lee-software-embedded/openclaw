@@ -218,5 +218,12 @@ def get_news():
         return jsonify(json.load(fp))
 
 if __name__ == "__main__":
-    print("🦞 Lobster Board API  →  http://0.0.0.0:3333")
-    app.run(host="0.0.0.0", port=3333, debug=False)
+    import sys
+    CERT = os.path.join(os.path.dirname(__file__), "..", "certs", "192.168.1.101+2.pem")
+    KEY  = os.path.join(os.path.dirname(__file__), "..", "certs", "192.168.1.101+2-key.pem")
+    if os.path.exists(CERT) and os.path.exists(KEY):
+        print("🦞 Lobster Board API  →  https://192.168.1.101:3333")
+        app.run(host="0.0.0.0", port=3333, debug=False, ssl_context=(CERT, KEY))
+    else:
+        print("🦞 Lobster Board API  →  http://0.0.0.0:3333  (no cert found)")
+        app.run(host="0.0.0.0", port=3333, debug=False)

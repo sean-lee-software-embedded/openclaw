@@ -1,0 +1,222 @@
+{
+  "db297fb465f4": {
+    "id": "db297fb465f4",
+    "title": "Linux 6.12 Through Linux 7.0 File-System Benchmarks For EXT4 + XFS",
+    "url": "https://www.phoronix.com/review/linux-612-linux-70-xfs-ext4",
+    "source": "Phoronix",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "245dc4de8c35": {
+    "id": "245dc4de8c35",
+    "title": "Intel Xe Driver In Linux 7.1 Preps For Intel Nova Lake P, Introduces VM_BIND DECOMPRESS",
+    "url": "https://www.phoronix.com/news/Intel-Xe-VM-BIND-DECOMPRESS",
+    "source": "Phoronix",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "9453d284b4b9": {
+    "id": "9453d284b4b9",
+    "title": "Vulkan 1.4.346 Released With Notable VK_KHR_device_address_commands",
+    "url": "https://www.phoronix.com/news/Vulkan-1.4.346-Released",
+    "source": "Phoronix",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "e21e5158c01f": {
+    "id": "e21e5158c01f",
+    "title": "FreeRDP 3.24 Released With Security Fixes & Improved X11 Client Support",
+    "url": "https://www.phoronix.com/news/FreeRDP-3.24-Released",
+    "source": "Phoronix",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "787e2bf6dcf9": {
+    "id": "787e2bf6dcf9",
+    "title": "3.0.0-dev",
+    "url": "https://github.com/openbmc/openbmc/releases/tag/3.0.0-dev",
+    "source": "OpenBMC Releases",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "8c393664caa9": {
+    "id": "8c393664caa9",
+    "title": "OpenBMC version 2.18.0",
+    "url": "https://github.com/openbmc/openbmc/releases/tag/2.18.0",
+    "source": "OpenBMC Releases",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "0cc0f0f25143": {
+    "id": "0cc0f0f25143",
+    "title": "2.18.0-dev",
+    "url": "https://github.com/openbmc/openbmc/releases/tag/2.18.0-dev",
+    "source": "OpenBMC Releases",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "8259dda432c1": {
+    "id": "8259dda432c1",
+    "title": "2.17.0-dev",
+    "url": "https://github.com/openbmc/openbmc/releases/tag/2.17.0-dev",
+    "source": "OpenBMC Releases",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "b594a28bf1a5": {
+    "id": "b594a28bf1a5",
+    "title": "The “files are all you need” debate misses what’s actually happening in agent memory architecture",
+    "url": "https://thenewstack.io/ai-agent-memory-architecture/",
+    "source": "The New Stack",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "393aadec769b": {
+    "id": "393aadec769b",
+    "title": "Before you let AI agents loose, you’d better know what they’re capable of",
+    "url": "https://thenewstack.io/risk-mitigation-agentic-ai/",
+    "source": "The New Stack",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "db38df260071": {
+    "id": "db38df260071",
+    "title": "Google will soon bring Chrome to ARM64 Linux",
+    "url": "https://thenewstack.io/google-will-soon-bring-chrome-to-arm64-linux/",
+    "source": "The New Stack",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "24b0812c08f7": {
+    "id": "24b0812c08f7",
+    "title": "SurePath AI advances MCP policy controls to tighten the cable on AI’s USB-C",
+    "url": "https://thenewstack.io/surepath-ai-mcp-policy-controls/",
+    "source": "The New Stack",
+    "topic": "cloud_bmc",
+    "topic_label": "🖥️ Cloud Server / OpenBMC",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "17fe603a1659": {
+    "id": "17fe603a1659",
+    "title": "Build an Agent That Thinks Like a Data Scientist: How We Hit #1 on DABStep with Reusable Tool Generation",
+    "url": "https://huggingface.co/blog/nvidia/nemo-agent-toolkit-data-explorer-dabstep-1st-place",
+    "source": "HuggingFace Blog",
+    "topic": "ai_news",
+    "topic_label": "🤖 AI 最新消息",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "96e67819270c": {
+    "id": "96e67819270c",
+    "title": "Introducing Storage Buckets on the Hugging Face Hub",
+    "url": "https://huggingface.co/blog/storage-buckets",
+    "source": "HuggingFace Blog",
+    "topic": "ai_news",
+    "topic_label": "🤖 AI 最新消息",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "1d66f35fb06c": {
+    "id": "1d66f35fb06c",
+    "title": "Keep the Tokens Flowing: Lessons from 16 Open-Source RL Libraries",
+    "url": "https://huggingface.co/blog/async-rl-training-landscape",
+    "source": "HuggingFace Blog",
+    "topic": "ai_news",
+    "topic_label": "🤖 AI 最新消息",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "e810070803cb": {
+    "id": "e810070803cb",
+    "title": "Granite 4.0 1B Speech: Compact, Multilingual, and Built for the Edge",
+    "url": "https://huggingface.co/blog/ibm-granite/granite-4-speech",
+    "source": "HuggingFace Blog",
+    "topic": "ai_news",
+    "topic_label": "🤖 AI 最新消息",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "e670024b9a32": {
+    "id": "e670024b9a32",
+    "title": "Railway secures $100 million to challenge AWS with AI-native cloud infrastructure",
+    "url": "https://venturebeat.com/infrastructure/railway-secures-usd100-million-to-challenge-aws-with-ai-native-cloud",
+    "source": "VentureBeat AI",
+    "topic": "ai_news",
+    "topic_label": "🤖 AI 最新消息",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "1bd5d5f60cc3": {
+    "id": "1bd5d5f60cc3",
+    "title": "Claude Code costs up to $200 a month. Goose does the same thing for free.",
+    "url": "https://venturebeat.com/infrastructure/claude-code-costs-up-to-usd200-a-month-goose-does-the-same-thing-for-free",
+    "source": "VentureBeat AI",
+    "topic": "ai_news",
+    "topic_label": "🤖 AI 最新消息",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "ca731494b194": {
+    "id": "ca731494b194",
+    "title": "Listen Labs raises $69M after viral billboard hiring stunt to scale AI customer interviews",
+    "url": "https://venturebeat.com/technology/listen-labs-raises-usd69m-after-viral-billboard-hiring-stunt-to-scale-ai",
+    "source": "VentureBeat AI",
+    "topic": "ai_news",
+    "topic_label": "🤖 AI 最新消息",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  },
+  "db7ff708ed2f": {
+    "id": "db7ff708ed2f",
+    "title": "Salesforce rolls out new Slackbot AI agent as it battles Microsoft and Google in workplace AI",
+    "url": "https://venturebeat.com/technology/salesforce-rolls-out-new-slackbot-ai-agent-as-it-battles-microsoft-and",
+    "source": "VentureBeat AI",
+    "topic": "ai_news",
+    "topic_label": "🤖 AI 最新消息",
+    "date": "2026-03-13",
+    "summary": "",
+    "sent": true
+  }
+}

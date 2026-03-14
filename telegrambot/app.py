@@ -179,7 +179,7 @@ async def cmd_summary(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 async def cmd_board(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not is_allowed(update.effective_user.id): return
     status = get_board_status()
-    link   = f"http://{MAC_IP}:3333"
+    link   = f"https://{MAC_IP}:3333"
     await update.message.reply_text(
         f"{status}\n\n🔗 打開 Board：{link}"
     )
