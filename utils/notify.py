@@ -5,10 +5,7 @@
 """
 import os, requests
 
-BOT_TOKEN = os.environ.get(
-    "TELEGRAM_BOT_TOKEN",
-    "8232639804:AAEv-3CqJ_FaSBdUGlEIH0kbaSoI56mVkqk"
-)
+BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "8626127659")
 
 def send(text: str, parse_mode: str = "HTML") -> bool:
