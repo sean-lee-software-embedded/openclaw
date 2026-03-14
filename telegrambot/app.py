@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 # Whitelist of Telegram user IDs (integers). Leave empty to allow all (for initial setup).
 ALLOWED_USERS: list[int] = [
-    # 123456789,  # 你
+    8626127659,  # 空空肖肖
     # 987654321,  # 兄弟 A
     # 111222333,  # 兄弟 B
 ]
