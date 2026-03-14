@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-import json, os, time, hashlib, feedparser, requests
+import json, os, sys, time, hashlib, feedparser, requests
 from datetime import datetime, date
+
+# 讓 utils 可以 import
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from utils.notify import send as tg_send
 
 DATA_DIR      = os.path.join(os.path.dirname(__file__), "..", "data")
 ARTICLES_FILE = os.path.join(DATA_DIR, "articles.json")
@@ -169,3 +173,6 @@ if __name__ == "__main__":
             json.dump({"date": str(date.today()), "summary": summary},
                       f, ensure_ascii=False, indent=2)
         mark_as_sent(articles)
+        # 推播到 Telegram
+        print("[INFO] 推播摘要到 Telegram...")
+        tg_send(summary)

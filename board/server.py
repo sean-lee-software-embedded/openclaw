@@ -218,5 +218,5 @@ def get_news():
         return jsonify(json.load(fp))
 
 if __name__ == "__main__":
-    print("🦞 Lobster Board API  →  http://localhost:3333")
-    app.run(host="127.0.0.1", port=3333, debug=False)
+    print("🦞 Lobster Board API  →  http://0.0.0.0:3333")
+    app.run(host="0.0.0.0", port=3333, debug=False)
