@@ -269,6 +269,7 @@
         <option value="Low">Low</option>
         <option value="Lowest">Lowest</option>
       </select>
+      <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Reset</button>
     </div>
     <button class="btn btn-primary btn-sm" onclick="openCreateIssue()">+ Create Issue</button>
   </div>
@@ -281,6 +282,7 @@
     <div class="modal-header">
       <span class="detail-key" id="detailKeyBadge"></span>
       <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" onclick="deleteIssue()" title="Delete issue">Delete</button>
       <button class="close-btn" onclick="closeModal('detailOverlay')">✕</button>
     </div>
     <div class="modal-body">
@@ -603,6 +605,17 @@ function applyFilters() {
   render();
 }
 
+function clearFilters() {
+  filters = { epic: '', assignee: '', priority: '' };
+  document.getElementById('filterEpic').value = '';
+  document.getElementById('filterAssignee').value = '';
+  document.getElementById('filterPriority').value = '';
+  sidebarEpicFilter = null;
+  renderSidebar();
+  render();
+  showToast('Filters cleared');
+}
+
 function filteredIssues(sprintId) {
   return data.issues.filter(i => {
     if (sprintId !== undefined && i.sprintId !== sprintId) return false;
@@ -788,12 +801,16 @@ function renderBacklog() {
 function renderBacklogRow(issue) {
   const ep = getEpic(issue.epicId);
   const m = getMember(issue.assigneeId);
+  const sprintOptions = ['<option value="">Backlog</option>']
+    .concat(data.sprints.filter(s => s.status !== 'completed').map(s => `<option value="${s.id}" ${issue.sprintId===s.id?'selected':''}>${s.name}</option>`))
+    .join('');
   return `<div class="backlog-item" onclick="openIssue('${issue.id}')">
     ${priorityIcon(issue.priority)}
     <span class="type-icon">${TYPE_ICONS[issue.type]||'📖'}</span>
     <span class="backlog-title">${escapeHtml(issue.key)} ${escapeHtml(issue.title)}</span>
     ${ep ? epicTagEl(issue.epicId) : '<span></span>'}
     <span class="pts-badge">${issue.points||0}</span>
+    <select onclick="event.stopPropagation()" onchange="moveIssueToSprint('${issue.id}', this.value)" class="filter-select" style="width:auto;max-width:140px">${sprintOptions}</select>
     ${avatarEl(issue.assigneeId)}
   </div>`;
 }
@@ -819,8 +836,31 @@ function completeSprint(e, sprintId) {
   e.stopPropagation();
   const sprint = getSprint(sprintId);
   if (!sprint) return;
+  const incomplete = data.issues.filter(i => i.sprintId === sprintId && i.status !== 'done');
+  if (incomplete.length) {
+    const nextPlanning = data.sprints.find(s => s.status === 'planning' && s.id !== sprintId);
+    const msg = nextPlanning
+      ? `${incomplete.length} unfinished issue(s). OK = move to ${nextPlanning.name}, Cancel = move to backlog.`
+      : `${incomplete.length} unfinished issue(s). OK = move to backlog.`;
+    const confirmed = window.confirm(msg);
+    incomplete.forEach(issue => {
+      issue.sprintId = (confirmed && nextPlanning) ? nextPlanning.id : null;
+      issue.updatedAt = new Date().toISOString();
+    });
+  }
   sprint.status = 'completed';
+  sprint.completedAt = new Date().toISOString();
   saveData(); render(); showToast(`${sprint.name} completed!`);
+}
+
+function moveIssueToSprint(issueId, sprintId) {
+  const issue = getIssue(issueId);
+  if (!issue) return;
+  issue.sprintId = sprintId || null;
+  issue.updatedAt = new Date().toISOString();
+  saveData();
+  render();
+  showToast(`${issue.key} moved ${sprintId ? 'to sprint' : 'to backlog'}`);
 }
 
 // ---- SPRINTS VIEW ----
@@ -1036,6 +1076,18 @@ function addComment() {
   document.getElementById('detailDates').innerHTML =
     `Created: ${formatDate(issue.createdAt)}<br>Updated: ${formatDate(issue.updatedAt)}`;
   render();
+}
+
+function deleteIssue() {
+  if (!activeIssueId) return;
+  const issue = getIssue(activeIssueId);
+  if (!issue) return;
+  if (!window.confirm(`Delete ${issue.key}? This cannot be undone.`)) return;
+  data.issues = data.issues.filter(i => i.id !== activeIssueId);
+  saveData();
+  closeModal('detailOverlay');
+  render();
+  showToast(`${issue.key} deleted`);
 }
 
 // ---- CREATE ISSUE ----
