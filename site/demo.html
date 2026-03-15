@@ -3,65 +3,116 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Board Demo</title>
+  <title>Board Auto Demo</title>
   <style>
-    :root{--bg:#0d1117;--panel:#161b22;--card:#1c2333;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--border:#30363d;}
+    :root{--bg:#0d1117;--panel:#161b22;--card:#1c2333;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--border:#30363d;--green:#3fb950}
     *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1100px;margin:0 auto;padding:28px 18px 40px}
-    h1{margin:0 0 10px;font-size:30px} p{color:var(--muted);line-height:1.6}
-    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
-    .panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px}
-    .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-    .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:white;background:var(--accent)}
-    .btn.secondary{background:transparent;border:1px solid var(--border);color:var(--text)}
-    .shots{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
-    .shot{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-    .shot iframe{width:100%;height:260px;border:0;background:white}
-    .label{padding:10px 12px;font-size:13px;color:var(--muted);border-top:1px solid var(--border)}
-    ol{margin:8px 0 0 20px;color:var(--muted)} li{margin:8px 0}
-    .badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#1f6feb22;color:#7cc0ff;border:1px solid #1f6feb44;font-size:12px;margin-right:8px}
-    @media (max-width:900px){.hero,.shots{grid-template-columns:1fr}.shot iframe{height:320px}}
+    .wrap{max-width:1200px;margin:0 auto;padding:22px 18px 40px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+    h1{margin:0;font-size:28px}.sub{color:var(--muted);font-size:14px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer}
+    .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn:hover{filter:brightness(1.08)}
+    .layout{display:grid;grid-template-columns:320px 1fr;gap:18px}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px}
+    .step{padding:12px;border-radius:12px;border:1px solid transparent;margin-bottom:10px;background:rgba(255,255,255,.02);transition:.2s}
+    .step.active{border-color:var(--accent);background:rgba(88,166,255,.08)}
+    .step.done{border-color:rgba(63,185,80,.35);background:rgba(63,185,80,.08)}
+    .step-title{font-weight:600;margin-bottom:6px}.step-desc{font-size:13px;color:var(--muted);line-height:1.5}
+    .viewer{position:relative;min-height:760px;padding:0;overflow:hidden}
+    iframe{width:100%;height:760px;border:0;background:#fff;border-radius:16px}
+    .caption{position:absolute;left:16px;right:16px;bottom:16px;background:rgba(13,17,23,.82);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+    .caption-title{font-size:16px;font-weight:700;margin-bottom:4px}.caption-desc{font-size:13px;color:var(--muted);line-height:1.5}
+    .progress{height:8px;background:#0b0f14;border-radius:999px;overflow:hidden;margin-top:12px;border:1px solid var(--border)}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .25s linear}
+    .meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;color:var(--muted)}
+    @media (max-width:900px){.layout{grid-template-columns:1fr}.viewer{min-height:560px} iframe{height:560px}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="hero">
-      <div class="panel">
-        <div class="badge">GitHub Pages Demo</div><div class="badge">Jira-like Board</div>
-        <h1>Project Board Demo</h1>
-        <p>這頁是給 demo 用的入口。你可以直接打開 Board 和 Daily Brief，也可以照著下面的 60 秒講稿走一遍。</p>
-        <div class="cta">
-          <a class="btn" href="./board.html">Open Board</a>
-          <a class="btn secondary" href="./news.html">Open Daily Brief</a>
-        </div>
+    <div class="top">
+      <div>
+        <h1>Auto Demo</h1>
+        <div class="sub">自動輪播展示 Board / Backlog / Sprints / Reports / Daily Brief</div>
       </div>
-      <div class="panel">
-        <strong>60 秒 demo script</strong>
-        <ol>
-          <li>先打開 Board，展示 <b>Board / Backlog / Sprints / Reports</b> 四個 view。</li>
-          <li>在 Board 裡拖動一張卡片，示範 status 流轉。</li>
-          <li>點開一張 issue，展示 <b>description / sub-task / comments / assignee / sprint</b>。</li>
-          <li>切到 Backlog，示範 issue 可直接移到 sprint。</li>
-          <li>切到 Sprints，完成 sprint 並處理 unfinished issues。</li>
-          <li>最後打開 Daily Brief，展示每天自動更新的新聞頁。</li>
-        </ol>
+      <div class="controls">
+        <button class="btn primary" id="playBtn">▶ Start Auto Demo</button>
+        <button class="btn" id="pauseBtn">⏸ Pause</button>
+        <button class="btn" id="nextBtn">⏭ Next</button>
+        <button class="btn" id="restartBtn">↺ Restart</button>
       </div>
     </div>
 
-    <div class="shots">
-      <div class="shot">
-        <iframe src="./board.html"></iframe>
-        <div class="label">Board view</div>
+    <div class="layout">
+      <div class="panel">
+        <div id="steps"></div>
+        <div class="progress"><div class="bar" id="bar"></div></div>
+        <div class="meta"><span id="counter">Step 1 / 5</span><span id="timer">5s</span></div>
       </div>
-      <div class="shot">
-        <iframe src="./board.html#backlog"></iframe>
-        <div class="label">Backlog / Sprint planning</div>
-      </div>
-      <div class="shot">
-        <iframe src="./news.html"></iframe>
-        <div class="label">Daily Brief</div>
+      <div class="panel viewer">
+        <iframe id="frame" src="./board.html"></iframe>
+        <div class="caption">
+          <div class="caption-title" id="capTitle"></div>
+          <div class="caption-desc" id="capDesc"></div>
+        </div>
       </div>
     </div>
   </div>
+<script>
+const slides = [
+  { title:'Board View', desc:'展示 Kanban board：To Do / In Progress / In Review / Done。可拖動卡片、快速看到 sprint 進度。', url:'./board.html', seconds:6 },
+  { title:'Backlog & Sprint Planning', desc:'展示 backlog 規劃與 issue 移動到 sprint 的能力，適合 sprint planning。', url:'./board.html?view=backlog#backlog', seconds:6 },
+  { title:'Sprints', desc:'展示 sprint overview、start/complete sprint 與剩餘 points 管理。', url:'./board.html?view=sprints#sprints', seconds:6 },
+  { title:'Reports', desc:'展示 status、priority、epic、velocity、assignee workload 等統計。', url:'./board.html?view=reports#reports', seconds:6 },
+  { title:'Daily Brief', desc:'展示每天自動更新的產業情報頁：Cloud Server / OpenBMC / AI。', url:'./news.html', seconds:7 }
+];
+let index = 0, playing = false, timer = null, remaining = slides[0].seconds, startedAt = null;
+const frame = document.getElementById('frame');
+const capTitle = document.getElementById('capTitle');
+const capDesc = document.getElementById('capDesc');
+const stepsEl = document.getElementById('steps');
+const bar = document.getElementById('bar');
+const counter = document.getElementById('counter');
+const timerEl = document.getElementById('timer');
+function renderSteps(){
+  stepsEl.innerHTML = slides.map((s,i)=>`<div class="step ${i===index?'active':''} ${i<index?'done':''}" onclick="goTo(${i})"><div class="step-title">${i+1}. ${s.title}</div><div class="step-desc">${s.desc}</div></div>`).join('');
+}
+function updateSlide(){
+  const s = slides[index];
+  frame.src = s.url;
+  capTitle.textContent = s.title;
+  capDesc.textContent = s.desc;
+  counter.textContent = `Step ${index+1} / ${slides.length}`;
+  renderSteps();
+  startedAt = Date.now();
+  updateProgress();
+}
+function updateProgress(){
+  const s = slides[index];
+  const elapsed = (Date.now()-startedAt)/1000;
+  const pct = Math.min(100, (elapsed/s.seconds)*100);
+  const left = Math.max(0, Math.ceil(s.seconds - elapsed));
+  bar.style.width = pct+'%';
+  timerEl.textContent = left + 's';
+}
+function tick(){
+  if(!playing) return;
+  updateProgress();
+  const s = slides[index];
+  if((Date.now()-startedAt)/1000 >= s.seconds){ next(); }
+}
+function play(){ if(playing) return; playing = true; if(!startedAt) startedAt = Date.now(); timer = setInterval(tick, 250); }
+function pause(){ playing = false; clearInterval(timer); timer = null; }
+function next(){ clearInterval(timer); timer=null; index = (index+1) % slides.length; updateSlide(); if(playing) timer = setInterval(tick,250); }
+function restart(){ clearInterval(timer); timer=null; index=0; updateSlide(); playing=true; timer=setInterval(tick,250); }
+function goTo(i){ index=i; clearInterval(timer); timer=null; updateSlide(); if(playing) timer=setInterval(tick,250); }
+window.goTo = goTo;
+document.getElementById('playBtn').onclick = ()=>{ if(!startedAt) updateSlide(); play(); };
+document.getElementById('pauseBtn').onclick = pause;
+document.getElementById('nextBtn').onclick = next;
+document.getElementById('restartBtn').onclick = restart;
+updateSlide();
+</script>
 </body>
 </html>
