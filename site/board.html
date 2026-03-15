@@ -243,7 +243,7 @@
       <span>Reports</span>
     </div>
   </div>
-  <div class="sidebar-section sidebar-text">Epics</div>
+  <div class="sidebar-section sidebar-text" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>Epics</span><button class="btn btn-ghost btn-sm" onclick="openEpicModal()">+ Epic</button></div>
   <div class="epic-filter" id="epicFilter"></div>
 </nav>
 
@@ -395,6 +395,8 @@
       <select id="createAssignee"><option value="">Unassigned</option></select>
       <label>Sprint</label>
       <select id="createSprint"><option value="">Backlog</option></select>
+      <label>Parent Issue</label>
+      <select id="createParent"><option value="">No Parent</option></select>
       <label>Initial Status</label>
       <select id="createStatus">
         <option value="todo">To Do</option>
@@ -1060,6 +1062,7 @@ function saveDetail() {
   issue.points = parseInt(document.getElementById('detailPoints').value) || 0;
   issue.assigneeId = document.getElementById('detailAssignee').value || null;
   issue.sprintId = document.getElementById('detailSprint').value || null;
+  if (document.getElementById('detailParent')) issue.parentId = document.getElementById('detailParent').value || null;
   issue.description = document.getElementById('detailDesc').value;
   issue.type = document.getElementById('detailType').value;
   issue.updatedAt = new Date().toISOString();
@@ -1165,6 +1168,7 @@ function submitCreateIssue() {
     priority: document.getElementById('createPriority').value,
     epicId: document.getElementById('createEpic').value || null,
     sprintId: document.getElementById('createSprint').value || null,
+    parentId: document.getElementById('createParent') ? (document.getElementById('createParent').value || null) : null,
     points: parseInt(document.getElementById('createPoints').value) || 0,
     assigneeId: document.getElementById('createAssignee').value || null,
     parentId: null,
