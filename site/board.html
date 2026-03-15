@@ -434,6 +434,29 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="epicOverlay">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">New Epic</div><button class="close-btn" onclick="closeModal('epicOverlay')">✕</button></div>
+    <div class="form-grid">
+      <div><label class="label">Epic Name</label><input class="input" id="newEpicName" placeholder="Epic name"></div>
+      <div><label class="label">Color</label><input class="input" id="newEpicColor" type="color" value="#1f6feb"></div>
+    </div>
+    <div class="actions-row"><button class="btn btn-primary btn-sm" onclick="createEpic()">Create Epic</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="memberOverlay">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">New Member</div><button class="close-btn" onclick="closeModal('memberOverlay')">✕</button></div>
+    <div class="form-grid">
+      <div><label class="label">Name</label><input class="input" id="newMemberName" placeholder="Member name"></div>
+      <div><label class="label">Initials</label><input class="input" id="newMemberInitials" placeholder="AB"></div>
+      <div><label class="label">Color</label><input class="input" id="newMemberColor" type="color" value="#3fb950"></div>
+    </div>
+    <div class="actions-row"><button class="btn btn-primary btn-sm" onclick="createMember()">Create Member</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
