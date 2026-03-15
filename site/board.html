@@ -457,6 +457,17 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="projectOverlay">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Project Settings</div><button class="close-btn" onclick="closeModal('projectOverlay')">✕</button></div>
+    <div class="form-grid">
+      <div><label class="label">Project Name</label><input class="input" id="projectNameInput" placeholder="Project name"></div>
+      <div><label class="label">Project Key</label><input class="input" id="projectKeyInput" placeholder="PRJ"></div>
+    </div>
+    <div class="actions-row"><button class="btn btn-primary btn-sm" onclick="saveProjectSettings()">Save</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -500,35 +511,41 @@ function seedData() {
     issues: [
       { id: 'i1', key: 'PRJ-1', title: 'Set up Express server and middleware', type: 'task', status: 'done',
         priority: 'High', epicId: 'e1', sprintId: 's1', points: 3, assigneeId: 'm1',
+        parentId: null,
         description: 'Initialize the Express.js server with CORS, body-parser, and authentication middleware.',
         subtasks: [{ id: 'st1', title: 'Install dependencies', done: true }, { id: 'st2', title: 'Configure CORS', done: true }],
         comments: [{ id: 'c1', text: 'Completed ahead of schedule!', author: 'Peter', createdAt: new Date(Date.now()-86400000).toISOString() }],
         createdAt: new Date(Date.now()-5*86400000).toISOString(), updatedAt: new Date(Date.now()-86400000).toISOString() },
       { id: 'i2', key: 'PRJ-2', title: 'Design login and registration screens', type: 'story', status: 'done',
         priority: 'High', epicId: 'e2', sprintId: 's1', points: 5, assigneeId: 'm2',
+        parentId: null,
         description: 'Create Figma mockups for login, registration, and forgot password flows.',
         subtasks: [], comments: [],
         createdAt: new Date(Date.now()-5*86400000).toISOString(), updatedAt: new Date(Date.now()-2*86400000).toISOString() },
       { id: 'i3', key: 'PRJ-3', title: 'Implement JWT authentication endpoint', type: 'story', status: 'inprogress',
         priority: 'Highest', epicId: 'e1', sprintId: 's1', points: 8, assigneeId: 'm1',
+        parentId: null,
         description: 'Build POST /auth/login and POST /auth/register endpoints with JWT token generation.',
         subtasks: [{ id: 'st3', title: 'Write login endpoint', done: true }, { id: 'st4', title: 'Write register endpoint', done: false }, { id: 'st5', title: 'Add refresh token logic', done: false }],
         comments: [{ id: 'c2', text: 'Login endpoint is done, working on register now.', author: 'Peter', createdAt: new Date(Date.now()-3600000).toISOString() }],
         createdAt: new Date(Date.now()-4*86400000).toISOString(), updatedAt: new Date(Date.now()-3600000).toISOString() },
       { id: 'i4', key: 'PRJ-4', title: 'Build responsive navigation component', type: 'story', status: 'inprogress',
         priority: 'Medium', epicId: 'e2', sprintId: 's1', points: 5, assigneeId: 'm2',
+        parentId: null,
         description: 'Create a responsive top navigation bar with mobile hamburger menu.',
         subtasks: [{ id: 'st6', title: 'Desktop layout', done: true }, { id: 'st7', title: 'Mobile hamburger menu', done: false }],
         comments: [],
         createdAt: new Date(Date.now()-3*86400000).toISOString(), updatedAt: new Date(Date.now()-7200000).toISOString() },
       { id: 'i5', key: 'PRJ-5', title: 'Fix pagination bug in user list API', type: 'bug', status: 'inreview',
         priority: 'High', epicId: 'e1', sprintId: 's1', points: 2, assigneeId: 'm3',
+        parentId: null,
         description: 'The /api/users endpoint returns incorrect results when page > 3. Off-by-one error in skip calculation.',
         subtasks: [],
         comments: [{ id: 'c3', text: 'Found the issue — skip calculation was using 0-indexed page number. PR up for review.', author: 'Bob', createdAt: new Date(Date.now()-1800000).toISOString() }],
         createdAt: new Date(Date.now()-2*86400000).toISOString(), updatedAt: new Date(Date.now()-1800000).toISOString() },
       { id: 'i6', key: 'PRJ-6', title: 'Create dashboard analytics widgets', type: 'story', status: 'todo',
         priority: 'Medium', epicId: 'e2', sprintId: 's1', points: 8, assigneeId: 'm2',
+        parentId: null,
         description: 'Build chart components for the analytics dashboard: line chart for trends, pie chart for breakdown.',
         subtasks: [{ id: 'st8', title: 'Line chart component', done: false }, { id: 'st9', title: 'Pie chart component', done: false }, { id: 'st10', title: 'Connect to API', done: false }],
         comments: [],
@@ -1150,7 +1167,8 @@ function submitCreateIssue() {
     sprintId: document.getElementById('createSprint').value || null,
     points: parseInt(document.getElementById('createPoints').value) || 0,
     assigneeId: document.getElementById('createAssignee').value || null,
-    description: '',
+    parentId: null,
+        description: '',
     subtasks: [],
     comments: [],
     createdAt: new Date().toISOString(),
