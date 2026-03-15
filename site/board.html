@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Board</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d1117; --sidebar-bg: #161b22; --card-bg: #1c2333; --card-hover: #21283a;
+    --border: #30363d; --text: #e6edf3; --text-muted: #8b949e; --text-dim: #6e7681;
+    --accent: #1f6feb; --accent-hover: #388bfd; --success: #3fb950; --warning: #d29922;
+    --danger: #f85149; --purple: #a371f7; --orange: #f0883e;
+    --radius: 6px; --radius-lg: 10px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar { width: 220px; min-width: 220px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; height: 100vh; overflow-y: auto; transition: width 0.2s; }
+  .sidebar.collapsed { width: 56px; min-width: 56px; }
+  .sidebar-header { padding: 16px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .project-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 6px; display: flex;
+    align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .project-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; }
+  .project-key { font-size: 11px; color: var(--text-muted); }
+  .sidebar-nav { padding: 8px 0; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 14px; cursor: pointer;
+    color: var(--text-muted); font-size: 13px; border-radius: 0; transition: all 0.15s; white-space: nowrap; overflow: hidden; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+  .nav-item.active { background: rgba(31,111,235,0.15); color: var(--accent-hover); }
+  .nav-item svg { flex-shrink: 0; }
+  .sidebar-section { padding: 14px 14px 6px; font-size: 11px; font-weight: 600; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.8px; white-space: nowrap; }
+  .epic-filter { padding: 4px 8px 8px; }
+  .epic-chip { display: flex; align-items: center; gap: 8px; padding: 5px 6px; cursor: pointer;
+    border-radius: var(--radius); font-size: 12px; transition: background 0.15s; }
+  .epic-chip:hover { background: rgba(255,255,255,0.05); }
+  .epic-chip.active { background: rgba(255,255,255,0.08); }
+  .epic-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .toggle-btn { width: 28px; height: 28px; background: none; border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; color: var(--text-muted); display: flex; align-items: center;
+    justify-content: center; margin: 8px auto; transition: all 0.15s; }
+  .toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .topbar { display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+    border-bottom: 1px solid var(--border); background: var(--sidebar-bg); flex-shrink: 0; }
+  .topbar h1 { font-size: 18px; font-weight: 600; flex: 1; }
+  .filter-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .filter-select { background: var(--card-bg); border: 1px solid var(--border); color: var(--text);
+    padding: 5px 10px; border-radius: var(--radius); font-size: 12px; cursor: pointer; }
+  .filter-select:focus { outline: none; border-color: var(--accent); }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+    border-radius: var(--radius); border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--card-bg); color: var(--text); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-icon { padding: 5px; border-radius: var(--radius); background: transparent; border: none;
+    cursor: pointer; color: var(--text-muted); transition: all 0.15s; display: flex; align-items: center; }
+  .btn-icon:hover { background: var(--card-bg); color: var(--text); }
+
+  /* CONTENT */
+  .content { flex: 1; overflow: auto; padding: 20px; }
+
+  /* BOARD VIEW */
+  .board { display: flex; gap: 12px; height: 100%; min-height: 0; }
+  .column { display: flex; flex-direction: column; min-width: 260px; width: calc(25% - 9px);
+    background: rgba(255,255,255,0.03); border-radius: var(--radius-lg); border: 1px solid var(--border); }
+  .column-header { padding: 12px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .column-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); flex: 1; }
+  .column-count { font-size: 11px; background: var(--card-bg); border-radius: 10px; padding: 1px 7px; color: var(--text-muted); }
+  .column-body { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .add-issue-btn { width: 100%; background: none; border: 1px dashed var(--border); border-radius: var(--radius);
+    color: var(--text-dim); padding: 7px; cursor: pointer; font-size: 12px; transition: all 0.15s; margin-top: 4px; }
+  .add-issue-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(31,111,235,0.05); }
+
+  /* CARD */
+  .card { background: var(--card-bg); border-radius: var(--radius); padding: 10px 12px;
+    cursor: pointer; border: 1px solid var(--border); transition: all 0.15s; position: relative; }
+  .card:hover { background: var(--card-hover); border-color: var(--accent); transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .card-epic { height: 3px; border-radius: 2px; margin-bottom: 8px; }
+  .card-key { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
+  .card-title { font-size: 13px; line-height: 1.4; margin-bottom: 8px; }
+  .card-footer { display: flex; align-items: center; gap: 6px; }
+  .card-points { font-size: 11px; background: rgba(255,255,255,0.08); border-radius: 10px;
+    padding: 1px 7px; color: var(--text-muted); margin-left: auto; }
+  .avatar { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+  .priority-icon { font-size: 13px; line-height: 1; }
+  .type-icon { font-size: 12px; }
+
+  /* BACKLOG */
+  .backlog { display: flex; flex-direction: column; gap: 12px; }
+  .sprint-block { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .sprint-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+    background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); cursor: pointer; }
+  .sprint-name { font-weight: 600; font-size: 14px; flex: 1; }
+  .sprint-meta { font-size: 12px; color: var(--text-muted); }
+  .sprint-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .badge-active { background: rgba(63,185,80,0.15); color: var(--success); border: 1px solid rgba(63,185,80,0.3); }
+  .badge-planning { background: rgba(139,148,158,0.15); color: var(--text-muted); border: 1px solid rgba(139,148,158,0.3); }
+  .badge-completed { background: rgba(88,166,255,0.15); color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); }
+  .burndown { display: flex; align-items: center; gap: 10px; padding: 8px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
+  .burndown-stat { font-size: 11px; color: var(--text-muted); }
+  .burndown-stat strong { color: var(--text); }
+  .progress-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--success); border-radius: 2px; transition: width 0.3s; }
+  .backlog-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px;
+    border-bottom: 1px solid rgba(48,54,61,0.5); cursor: pointer; transition: background 0.1s; }
+  .backlog-item:last-child { border-bottom: none; }
+  .backlog-item:hover { background: rgba(255,255,255,0.03); }
+  .backlog-title { flex: 1; font-size: 13px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .epic-tag { font-size: 10px; padding: 2px 6px; border-radius: 10px; white-space: nowrap; font-weight: 500; }
+  .pts-badge { font-size: 11px; color: var(--text-muted); min-width: 28px; text-align: center;
+    background: rgba(255,255,255,0.06); border-radius: 10px; padding: 1px 6px; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
+    display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
+  .modal-overlay.hidden { display: none; }
+  .modal { background: var(--sidebar-bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    width: 100%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal-sm { max-width: 480px; }
+  .modal-header { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .modal-title { font-size: 16px; font-weight: 600; flex: 1; }
+  .modal-body { overflow-y: auto; padding: 20px; flex: 1; }
+  .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0; }
+  .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px;
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    border-radius: var(--radius); transition: all 0.15s; }
+  .close-btn:hover { background: var(--card-bg); color: var(--text); }
+
+  /* ISSUE DETAIL */
+  .detail-layout { display: grid; grid-template-columns: 1fr 220px; gap: 24px; }
+  .detail-title { font-size: 20px; font-weight: 600; line-height: 1.3; margin-bottom: 16px;
+    outline: none; border: 1px solid transparent; border-radius: var(--radius); padding: 4px 6px;
+    background: transparent; color: var(--text); width: 100%; }
+  .detail-title:focus { border-color: var(--accent); background: rgba(31,111,235,0.05); }
+  .detail-key { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+  label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; margin-top: 14px; }
+  input, select, textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--border);
+    color: var(--text); padding: 7px 10px; border-radius: var(--radius); font-size: 13px; font-family: inherit; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+  .detail-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .subtasks { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .subtask-row { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.03);
+    border-radius: var(--radius); padding: 6px 10px; }
+  .subtask-row input[type="checkbox"] { width: auto; accent-color: var(--accent); }
+  .subtask-text { flex: 1; font-size: 13px; }
+  .subtask-text.done { text-decoration: line-through; color: var(--text-dim); }
+  .add-subtask { display: flex; gap: 6px; margin-top: 8px; }
+  .add-subtask input { flex: 1; }
+  .comments { margin-top: 8px; display: flex; flex-direction: column; gap: 10px; }
+  .comment-row { background: rgba(255,255,255,0.03); border-radius: var(--radius); padding: 10px 12px; }
+  .comment-meta { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; }
+  .comment-text { font-size: 13px; line-height: 1.5; }
+  .add-comment { display: flex; gap: 8px; margin-top: 8px; align-items: flex-start; }
+  .add-comment textarea { flex: 1; min-height: 60px; }
+  .detail-meta { display: flex; flex-direction: column; gap: 4px; }
+  .meta-item { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
+  .meta-dates { font-size: 11px; color: var(--text-dim); margin-top: 10px; line-height: 1.8; }
+  .section-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; margin-top: 20px; color: var(--text); }
+
+  /* REPORTS VIEW */
+  .reports { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .report-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+  .report-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text); }
+  .stat-row { display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid rgba(48,54,61,0.5); font-size: 13px; }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-val { font-weight: 600; color: var(--accent-hover); }
+
+  /* SPRINTS VIEW */
+  .sprints-list { display: flex; flex-direction: column; gap: 12px; }
+  .sprint-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; }
+  .sprint-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .sprint-card-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .sprint-goal { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; font-style: italic; }
+  .sprint-dates { font-size: 12px; color: var(--text-dim); }
+
+  /* DRAG */
+  .card.dragging { opacity: 0.4; }
+  .column-body.drag-over { background: rgba(31,111,235,0.06); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .sidebar { position: fixed; z-index: 50; height: 100vh; left: 0; top: 0; transform: translateX(-100%); }
+    .sidebar.mobile-open { transform: translateX(0); }
+    .main { width: 100%; }
+    .board { flex-direction: column; }
+    .column { width: 100%; min-width: unset; }
+    .detail-layout { grid-template-columns: 1fr; }
+    .topbar { padding: 10px 14px; }
+    .content { padding: 14px; }
+  }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-dim); }
+  .empty-state svg { margin-bottom: 12px; opacity: 0.3; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 16px; font-size: 13px; z-index: 200;
+    transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="project-icon" id="projIcon">PRJ</div>
+    <div class="sidebar-text">
+      <div class="project-name" id="sidebarProjectName">My Project</div>
+      <div class="project-key">Software Project</div>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-item active" onclick="switchView('board')" id="nav-board">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="10" rx="1"/><rect x="14" y="17" width="7" height="4" rx="1"/></svg>
+      <span>Board</span>
+    </div>
+    <div class="nav-item" onclick="switchView('backlog')" id="nav-backlog">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+      <span>Backlog</span>
+    </div>
+    <div class="nav-item" onclick="switchView('sprints')" id="nav-sprints">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      <span>Sprints</span>
+    </div>
+    <div class="nav-item" onclick="switchView('reports')" id="nav-reports">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Reports</span>
+    </div>
+  </div>
+  <div class="sidebar-section sidebar-text">Epics</div>
+  <div class="epic-filter" id="epicFilter"></div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <button class="btn-icon" onclick="toggleSidebar()" title="Toggle sidebar">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <h1 id="viewTitle">Board</h1>
+    <div class="filter-bar" id="filterBar">
+      <select class="filter-select" id="filterEpic" onchange="applyFilters()">
+        <option value="">All Epics</option>
+      </select>
+      <select class="filter-select" id="filterAssignee" onchange="applyFilters()">
+        <option value="">All Assignees</option>
+      </select>
+      <select class="filter-select" id="filterPriority" onchange="applyFilters()">
+        <option value="">All Priorities</option>
+        <option value="Highest">Highest</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+        <option value="Lowest">Lowest</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="openCreateIssue()">+ Create Issue</button>
+  </div>
+  <div class="content" id="mainContent"></div>
+</div>
+
+<!-- ISSUE DETAIL MODAL -->
+<div class="modal-overlay hidden" id="detailOverlay" onclick="handleOverlayClick(event,'detailOverlay')">
+  <div class="modal" id="detailModal">
+    <div class="modal-header">
+      <span class="detail-key" id="detailKeyBadge"></span>
+      <div style="flex:1"></div>
+      <button class="close-btn" onclick="closeModal('detailOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-layout">
+        <div>
+          <input type="text" class="detail-title" id="detailTitle" placeholder="Issue title" />
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:6px">
+              <label style="margin:0;font-size:12px">Status</label>
+              <select id="detailStatus" onchange="saveDetail()" style="width:auto;padding:4px 8px;font-size:12px">
+                <option value="todo">To Do</option>
+                <option value="inprogress">In Progress</option>
+                <option value="inreview">In Review</option>
+                <option value="done">Done</option>
+              </select>
+            </div>
+          </div>
+          <div class="section-title">Description</div>
+          <textarea id="detailDesc" placeholder="Add a description..." rows="4" onblur="saveDetail()"></textarea>
+          <div class="section-title">Sub-tasks</div>
+          <div class="subtasks" id="subtaskList"></div>
+          <div class="add-subtask">
+            <input type="text" id="newSubtask" placeholder="Add sub-task..." onkeydown="if(event.key==='Enter')addSubtask()" />
+            <button class="btn btn-ghost btn-sm" onclick="addSubtask()">Add</button>
+          </div>
+          <div class="section-title">Comments</div>
+          <div class="comments" id="commentList"></div>
+          <div class="add-comment">
+            <textarea id="newComment" placeholder="Add a comment..." rows="2"></textarea>
+            <button class="btn btn-primary btn-sm" onclick="addComment()" style="white-space:nowrap">Post</button>
+          </div>
+        </div>
+        <div class="detail-meta">
+          <div class="meta-item">
+            <label>Priority</label>
+            <select id="detailPriority" onchange="saveDetail()">
+              <option value="Highest">↑↑ Highest</option>
+              <option value="High">↑ High</option>
+              <option value="Medium">→ Medium</option>
+              <option value="Low">↓ Low</option>
+              <option value="Lowest">↓↓ Lowest</option>
+            </select>
+          </div>
+          <div class="meta-item">
+            <label>Epic</label>
+            <select id="detailEpic" onchange="saveDetail()">
+              <option value="">None</option>
+            </select>
+          </div>
+          <div class="meta-item">
+            <label>Story Points</label>
+            <input type="number" id="detailPoints" min="0" max="100" onblur="saveDetail()" style="width:100%" />
+          </div>
+          <div class="meta-item">
+            <label>Assignee</label>
+            <select id="detailAssignee" onchange="saveDetail()">
+              <option value="">Unassigned</option>
+            </select>
+          </div>
+          <div class="meta-item">
+            <label>Sprint</label>
+            <select id="detailSprint" onchange="saveDetail()">
+              <option value="">Backlog</option>
+            </select>
+          </div>
+          <div class="meta-item">
+            <label>Type</label>
+            <select id="detailType" onchange="saveDetail()">
+              <option value="story">📖 Story</option>
+              <option value="bug">🐛 Bug</option>
+              <option value="task">✅ Task</option>
+            </select>
+          </div>
+          <div class="meta-dates" id="detailDates"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE ISSUE MODAL -->
+<div class="modal-overlay hidden" id="createOverlay" onclick="handleOverlayClick(event,'createOverlay')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title">Create Issue</span>
+      <button class="close-btn" onclick="closeModal('createOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Title *</label>
+      <input type="text" id="createTitle" placeholder="Issue title" autofocus />
+      <label>Type</label>
+      <select id="createType">
+        <option value="story">📖 Story</option>
+        <option value="bug">🐛 Bug</option>
+        <option value="task">✅ Task</option>
+      </select>
+      <label>Epic</label>
+      <select id="createEpic"><option value="">None</option></select>
+      <label>Priority</label>
+      <select id="createPriority">
+        <option value="Medium">→ Medium</option>
+        <option value="Highest">↑↑ Highest</option>
+        <option value="High">↑ High</option>
+        <option value="Low">↓ Low</option>
+        <option value="Lowest">↓↓ Lowest</option>
+      </select>
+      <label>Story Points</label>
+      <input type="number" id="createPoints" placeholder="0" min="0" max="100" />
+      <label>Assignee</label>
+      <select id="createAssignee"><option value="">Unassigned</option></select>
+      <label>Sprint</label>
+      <select id="createSprint"><option value="">Backlog</option></select>
+      <label>Initial Status</label>
+      <select id="createStatus">
+        <option value="todo">To Do</option>
+        <option value="inprogress">In Progress</option>
+        <option value="inreview">In Review</option>
+        <option value="done">Done</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('createOverlay')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCreateIssue()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE SPRINT MODAL -->
+<div class="modal-overlay hidden" id="sprintOverlay" onclick="handleOverlayClick(event,'sprintOverlay')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title">Create Sprint</span>
+      <button class="close-btn" onclick="closeModal('sprintOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Sprint Name *</label>
+      <input type="text" id="sprintName" placeholder="Sprint 2" />
+      <label>Goal</label>
+      <input type="text" id="sprintGoal" placeholder="What's the goal this sprint?" />
+      <label>Start Date</label>
+      <input type="date" id="sprintStart" />
+      <label>End Date</label>
+      <input type="date" id="sprintEnd" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('sprintOverlay')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCreateSprint()">Create Sprint</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'ori-jira-v1';
+const STATUSES = ['todo','inprogress','inreview','done'];
+const STATUS_LABELS = { todo:'To Do', inprogress:'In Progress', inreview:'In Review', done:'Done' };
+const PRIORITY_ICONS = { Highest:'↑↑', High:'↑', Medium:'→', Low:'↓', Lowest:'↓↓' };
+const PRIORITY_COLORS = { Highest:'#f85149', High:'#f0883e', Medium:'#d29922', Low:'#3fb950', Lowest:'#8b949e' };
+const TYPE_ICONS = { story:'📖', bug:'🐛', task:'✅' };
+
+let data = null;
+let currentView = 'board';
+let activeIssueId = null;
+let sidebarEpicFilter = null;
+let filters = { epic: '', assignee: '', priority: '' };
+let dragIssueId = null;
+
+function seedData() {
+  const today = new Date();
+  const twoWeeksAgo = new Date(today); twoWeeksAgo.setDate(today.getDate() - 7);
+  const oneWeekLater = new Date(today); oneWeekLater.setDate(today.getDate() + 7);
+  return {
+    project: { name: 'My Project', key: 'PRJ' },
+    epics: [
+      { id: 'e1', name: 'Backend API', color: '#1f6feb' },
+      { id: 'e2', name: 'Frontend UI', color: '#a371f7' }
+    ],
+    members: [
+      { id: 'm1', name: 'Peter', initials: 'PE', color: '#1f6feb' },
+      { id: 'm2', name: 'Alice', initials: 'AL', color: '#3fb950' },
+      { id: 'm3', name: 'Bob', initials: 'BO', color: '#f0883e' }
+    ],
+    sprints: [
+      {
+        id: 's1', name: 'Sprint 1', goal: 'Launch core API and login UI',
+        startDate: twoWeeksAgo.toISOString().slice(0,10),
+        endDate: oneWeekLater.toISOString().slice(0,10),
+        status: 'active'
+      }
+    ],
+    issues: [
+      { id: 'i1', key: 'PRJ-1', title: 'Set up Express server and middleware', type: 'task', status: 'done',
+        priority: 'High', epicId: 'e1', sprintId: 's1', points: 3, assigneeId: 'm1',
+        description: 'Initialize the Express.js server with CORS, body-parser, and authentication middleware.',
+        subtasks: [{ id: 'st1', title: 'Install dependencies', done: true }, { id: 'st2', title: 'Configure CORS', done: true }],
+        comments: [{ id: 'c1', text: 'Completed ahead of schedule!', author: 'Peter', createdAt: new Date(Date.now()-86400000).toISOString() }],
+        createdAt: new Date(Date.now()-5*86400000).toISOString(), updatedAt: new Date(Date.now()-86400000).toISOString() },
+      { id: 'i2', key: 'PRJ-2', title: 'Design login and registration screens', type: 'story', status: 'done',
+        priority: 'High', epicId: 'e2', sprintId: 's1', points: 5, assigneeId: 'm2',
+        description: 'Create Figma mockups for login, registration, and forgot password flows.',
+        subtasks: [], comments: [],
+        createdAt: new Date(Date.now()-5*86400000).toISOString(), updatedAt: new Date(Date.now()-2*86400000).toISOString() },
+      { id: 'i3', key: 'PRJ-3', title: 'Implement JWT authentication endpoint', type: 'story', status: 'inprogress',
+        priority: 'Highest', epicId: 'e1', sprintId: 's1', points: 8, assigneeId: 'm1',
+        description: 'Build POST /auth/login and POST /auth/register endpoints with JWT token generation.',
+        subtasks: [{ id: 'st3', title: 'Write login endpoint', done: true }, { id: 'st4', title: 'Write register endpoint', done: false }, { id: 'st5', title: 'Add refresh token logic', done: false }],
+        comments: [{ id: 'c2', text: 'Login endpoint is done, working on register now.', author: 'Peter', createdAt: new Date(Date.now()-3600000).toISOString() }],
+        createdAt: new Date(Date.now()-4*86400000).toISOString(), updatedAt: new Date(Date.now()-3600000).toISOString() },
+      { id: 'i4', key: 'PRJ-4', title: 'Build responsive navigation component', type: 'story', status: 'inprogress',
+        priority: 'Medium', epicId: 'e2', sprintId: 's1', points: 5, assigneeId: 'm2',
+        description: 'Create a responsive top navigation bar with mobile hamburger menu.',
+        subtasks: [{ id: 'st6', title: 'Desktop layout', done: true }, { id: 'st7', title: 'Mobile hamburger menu', done: false }],
+        comments: [],
+        createdAt: new Date(Date.now()-3*86400000).toISOString(), updatedAt: new Date(Date.now()-7200000).toISOString() },
+      { id: 'i5', key: 'PRJ-5', title: 'Fix pagination bug in user list API', type: 'bug', status: 'inreview',
+        priority: 'High', epicId: 'e1', sprintId: 's1', points: 2, assigneeId: 'm3',
+        description: 'The /api/users endpoint returns incorrect results when page > 3. Off-by-one error in skip calculation.',
+        subtasks: [],
+        comments: [{ id: 'c3', text: 'Found the issue — skip calculation was using 0-indexed page number. PR up for review.', author: 'Bob', createdAt: new Date(Date.now()-1800000).toISOString() }],
+        createdAt: new Date(Date.now()-2*86400000).toISOString(), updatedAt: new Date(Date.now()-1800000).toISOString() },
+      { id: 'i6', key: 'PRJ-6', title: 'Create dashboard analytics widgets', type: 'story', status: 'todo',
+        priority: 'Medium', epicId: 'e2', sprintId: 's1', points: 8, assigneeId: 'm2',
+        description: 'Build chart components for the analytics dashboard: line chart for trends, pie chart for breakdown.',
+        subtasks: [{ id: 'st8', title: 'Line chart component', done: false }, { id: 'st9', title: 'Pie chart component', done: false }, { id: 'st10', title: 'Connect to API', done: false }],
+        comments: [],
+        createdAt: new Date(Date.now()-86400000).toISOString(), updatedAt: new Date(Date.now()-86400000).toISOString() }
+    ],
+    _nextIssueNum: 7
+  };
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    data = raw ? JSON.parse(raw) : seedData();
+    if (!data._nextIssueNum) data._nextIssueNum = data.issues.length + 1;
+  } catch(e) { data = seedData(); }
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function getEpic(id) { return data.epics.find(e => e.id === id); }
+function getMember(id) { return data.members.find(m => m.id === id); }
+function getSprint(id) { return data.sprints.find(s => s.id === id); }
+function getIssue(id) { return data.issues.find(i => i.id === id); }
+
+function priorityIcon(p) {
+  return `<span class="priority-icon" style="color:${PRIORITY_COLORS[p]||'#8b949e'}" title="${p}">${PRIORITY_ICONS[p]||'→'}</span>`;
+}
+
+function avatarEl(memberId) {
+  if (!memberId) return `<div class="avatar" style="background:#30363d;color:#8b949e">?</div>`;
+  const m = getMember(memberId);
+  if (!m) return '';
+  return `<div class="avatar" style="background:${m.color}" title="${m.name}">${m.initials}</div>`;
+}
+
+function epicTagEl(epicId, small) {
+  const ep = getEpic(epicId);
+  if (!ep) return '';
+  return `<span class="epic-tag" style="background:${ep.color}22;color:${ep.color};border:1px solid ${ep.color}44">${ep.name}</span>`;
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function formatDateShort(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+// ---- SIDEBAR ----
+function renderSidebar() {
+  const el = document.getElementById('projIcon');
+  el.textContent = data.project.key;
+  document.getElementById('sidebarProjectName').textContent = data.project.name;
+  // Epic filter
+  const ef = document.getElementById('epicFilter');
+  ef.innerHTML = `<div class="epic-chip ${sidebarEpicFilter===null?'active':''}" onclick="setSidebarEpic(null)">
+    <div class="epic-dot" style="background:#8b949e"></div><span>All Epics</span></div>`;
+  data.epics.forEach(ep => {
+    ef.innerHTML += `<div class="epic-chip ${sidebarEpicFilter===ep.id?'active':''}" onclick="setSidebarEpic('${ep.id}')">
+      <div class="epic-dot" style="background:${ep.color}"></div><span>${ep.name}</span></div>`;
+  });
+}
+
+function setSidebarEpic(id) {
+  sidebarEpicFilter = id;
+  document.getElementById('filterEpic').value = id || '';
+  applyFilters();
+  renderSidebar();
+  render();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+// ---- FILTERS ----
+function populateFilters() {
+  const fe = document.getElementById('filterEpic');
+  fe.innerHTML = '<option value="">All Epics</option>';
+  data.epics.forEach(ep => fe.innerHTML += `<option value="${ep.id}">${ep.name}</option>`);
+  const fa = document.getElementById('filterAssignee');
+  fa.innerHTML = '<option value="">All Assignees</option>';
+  data.members.forEach(m => fa.innerHTML += `<option value="${m.id}">${m.name}</option>`);
+}
+
+function applyFilters() {
+  filters.epic = document.getElementById('filterEpic').value;
+  filters.assignee = document.getElementById('filterAssignee').value;
+  filters.priority = document.getElementById('filterPriority').value;
+  if (filters.epic) { sidebarEpicFilter = filters.epic; renderSidebar(); }
+  else { sidebarEpicFilter = null; renderSidebar(); }
+  render();
+}
+
+function filteredIssues(sprintId) {
+  return data.issues.filter(i => {
+    if (sprintId !== undefined && i.sprintId !== sprintId) return false;
+    if (filters.epic && i.epicId !== filters.epic) return false;
+    if (filters.assignee && i.assigneeId !== filters.assignee) return false;
+    if (filters.priority && i.priority !== filters.priority) return false;
+    return true;
+  });
+}
+
+// ---- VIEW SWITCHING ----
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-'+view).classList.add('active');
+  const titles = { board:'Board', backlog:'Backlog', sprints:'Sprints', reports:'Reports' };
+  document.getElementById('viewTitle').textContent = titles[view];
+  const filterBar = document.getElementById('filterBar');
+  filterBar.style.display = (view === 'board' || view === 'backlog') ? 'flex' : 'none';
+  render();
+}
+
+function render() {
+  if (currentView === 'board') renderBoard();
+  else if (currentView === 'backlog') renderBacklog();
+  else if (currentView === 'sprints') renderSprints();
+  else if (currentView === 'reports') renderReports();
+}
+
+// ---- BOARD ----
+function renderBoard() {
+  const activeSprint = data.sprints.find(s => s.status === 'active');
+  const sprintId = activeSprint ? activeSprint.id : undefined;
+  const issuesByStatus = {};
+  STATUSES.forEach(s => issuesByStatus[s] = []);
+  filteredIssues(sprintId).forEach(i => {
+    if (issuesByStatus[i.status]) issuesByStatus[i.status].push(i);
+  });
+
+  let burndownHtml = '';
+  if (activeSprint) {
+    const allInSprint = data.issues.filter(i => i.sprintId === activeSprint.id);
+    const totalPts = allInSprint.reduce((a,i) => a + (i.points||0), 0);
+    const donePts = allInSprint.filter(i => i.status==='done').reduce((a,i) => a + (i.points||0), 0);
+    const pct = totalPts ? Math.round(donePts/totalPts*100) : 0;
+    burndownHtml = `<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <span style="font-size:13px;font-weight:600">${activeSprint.name}</span>
+      <span class="sprint-badge badge-active">Active</span>
+      <span style="font-size:12px;color:var(--text-muted)">Ends ${activeSprint.endDate}</span>
+      <div style="flex:1;min-width:120px"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>
+      <span style="font-size:12px;color:var(--text-muted)"><strong style="color:var(--text)">${donePts}</strong>/${totalPts} pts done</span>
+    </div>`;
+  }
+
+  const columnsHtml = STATUSES.map(status => {
+    const issues = issuesByStatus[status];
+    const cardsHtml = issues.length ? issues.map(i => renderCard(i)).join('') :
+      `<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px">No issues</div>`;
+    return `<div class="column" ondragover="onDragOver(event)" ondrop="onDrop(event,'${status}')" ondragleave="onDragLeave(event)">
+      <div class="column-header">
+        <span class="column-title">${STATUS_LABELS[status]}</span>
+        <span class="column-count">${issues.length}</span>
+      </div>
+      <div class="column-body" id="col-${status}">
+        ${cardsHtml}
+        <button class="add-issue-btn" onclick="openCreateIssue('${status}')">+ Add Issue</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('mainContent').innerHTML = burndownHtml +
+    `<div class="board">${columnsHtml}</div>`;
+}
+
+function renderCard(issue) {
+  const ep = getEpic(issue.epicId);
+  const epicBar = ep ? `<div class="card-epic" style="background:${ep.color}"></div>` : '';
+  return `<div class="card" draggable="true" onclick="openIssue('${issue.id}')"
+    ondragstart="onDragStart(event,'${issue.id}')" ondragend="onDragEnd(event)">
+    ${epicBar}
+    <div class="card-key">${issue.key}</div>
+    <div class="card-title">${escapeHtml(issue.title)}</div>
+    <div class="card-footer">
+      ${priorityIcon(issue.priority)}
+      <span class="type-icon" title="${issue.type}">${TYPE_ICONS[issue.type]||'📖'}</span>
+      ${ep ? `<div class="epic-dot" style="background:${ep.color};border-radius:50%;width:8px;height:8px" title="${ep.name}"></div>` : ''}
+      <span class="card-points">${issue.points||0} pts</span>
+      ${avatarEl(issue.assigneeId)}
+    </div>
+  </div>`;
+}
+
+// ---- DRAG & DROP ----
+function onDragStart(e, issueId) {
+  dragIssueId = issueId;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  dragIssueId = null;
+}
+function onDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.querySelector('.column-body')?.classList.add('drag-over');
+}
+function onDragLeave(e) {
+  e.currentTarget.querySelector('.column-body')?.classList.remove('drag-over');
+}
+function onDrop(e, status) {
+  e.preventDefault();
+  e.currentTarget.querySelector('.column-body')?.classList.remove('drag-over');
+  if (!dragIssueId) return;
+  const issue = getIssue(dragIssueId);
+  if (issue && issue.status !== status) {
+    issue.status = status;
+    issue.updatedAt = new Date().toISOString();
+    saveData();
+    render();
+    showToast(`Moved to ${STATUS_LABELS[status]}`);
+  }
+}
+
+// ---- BACKLOG ----
+function renderBacklog() {
+  const activeSprint = data.sprints.find(s => s.status === 'active');
+  let html = '<div class="backlog">';
+
+  data.sprints.forEach(sprint => {
+    const issues = filteredIssues(sprint.id);
+    const totalPts = issues.reduce((a,i) => a + (i.points||0), 0);
+    const donePts = issues.filter(i => i.status==='done').reduce((a,i) => a + (i.points||0), 0);
+    const remPts = totalPts - donePts;
+    const pct = totalPts ? Math.round(donePts/totalPts*100) : 0;
+    const badgeClass = sprint.status === 'active' ? 'badge-active' : sprint.status === 'completed' ? 'badge-completed' : 'badge-planning';
+
+    html += `<div class="sprint-block">
+      <div class="sprint-header" onclick="toggleSprintBlock('sb-${sprint.id}')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        <span class="sprint-name">${sprint.name}</span>
+        <span class="sprint-badge ${badgeClass}">${sprint.status}</span>
+        <span class="sprint-meta">${sprint.startDate} → ${sprint.endDate}</span>
+        <span class="column-count">${issues.length} issues</span>
+        ${sprint.status === 'planning' ? `<button class="btn btn-primary btn-sm" onclick="startSprint(event,'${sprint.id}')">Start Sprint</button>` : ''}
+        ${sprint.status === 'active' ? `<button class="btn btn-ghost btn-sm" onclick="completeSprint(event,'${sprint.id}')">Complete</button>` : ''}
+      </div>
+      <div class="burndown">
+        <div class="burndown-stat">Total: <strong>${totalPts}</strong> pts</div>
+        <div class="burndown-stat">Done: <strong>${donePts}</strong></div>
+        <div class="burndown-stat">Remaining: <strong>${remPts}</strong></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="burndown-stat"><strong>${pct}%</strong></div>
+      </div>
+      <div id="sb-${sprint.id}">`;
+
+    if (!issues.length) {
+      html += `<div class="empty-state" style="padding:20px">No issues in this sprint yet.</div>`;
+    } else {
+      issues.forEach(i => html += renderBacklogRow(i));
+    }
+    html += `</div></div>`;
+  });
+
+  // Backlog (unassigned sprint)
+  const backlogIssues = filteredIssues().filter(i => !i.sprintId);
+  html += `<div class="sprint-block">
+    <div class="sprint-header">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="sprint-name">Backlog</span>
+      <span class="column-count">${backlogIssues.length} issues</span>
+      <button class="btn btn-ghost btn-sm" onclick="openCreateSprint()">+ Create Sprint</button>
+    </div>
+    <div id="sb-backlog">`;
+  if (!backlogIssues.length) {
+    html += `<div class="empty-state" style="padding:20px">No unassigned issues.</div>`;
+  } else {
+    backlogIssues.forEach(i => html += renderBacklogRow(i));
+  }
+  html += `</div></div></div>`;
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+function renderBacklogRow(issue) {
+  const ep = getEpic(issue.epicId);
+  const m = getMember(issue.assigneeId);
+  return `<div class="backlog-item" onclick="openIssue('${issue.id}')">
+    ${priorityIcon(issue.priority)}
+    <span class="type-icon">${TYPE_ICONS[issue.type]||'📖'}</span>
+    <span class="backlog-title">${escapeHtml(issue.key)} ${escapeHtml(issue.title)}</span>
+    ${ep ? epicTagEl(issue.epicId) : '<span></span>'}
+    <span class="pts-badge">${issue.points||0}</span>
+    ${avatarEl(issue.assigneeId)}
+  </div>`;
+}
+
+function toggleSprintBlock(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+function startSprint(e, sprintId) {
+  e.stopPropagation();
+  const sprint = getSprint(sprintId);
+  if (!sprint) return;
+  // Only one active sprint at a time
+  if (data.sprints.some(s => s.status === 'active')) {
+    showToast('Complete the current sprint first!'); return;
+  }
+  sprint.status = 'active';
+  saveData(); render(); showToast(`${sprint.name} started!`);
+}
+
+function completeSprint(e, sprintId) {
+  e.stopPropagation();
+  const sprint = getSprint(sprintId);
+  if (!sprint) return;
+  sprint.status = 'completed';
+  saveData(); render(); showToast(`${sprint.name} completed!`);
+}
+
+// ---- SPRINTS VIEW ----
+function renderSprints() {
+  let html = '<div class="sprints-list">';
+  data.sprints.forEach(sprint => {
+    const issues = data.issues.filter(i => i.sprintId === sprint.id);
+    const total = issues.reduce((a,i) => a+(i.points||0), 0);
+    const done = issues.filter(i=>i.status==='done').reduce((a,i)=>a+(i.points||0),0);
+    const badgeClass = sprint.status==='active'?'badge-active':sprint.status==='completed'?'badge-completed':'badge-planning';
+    html += `<div class="sprint-card">
+      <div class="sprint-card-header">
+        <span class="sprint-card-name">${sprint.name}</span>
+        <span class="sprint-badge ${badgeClass}">${sprint.status}</span>
+        ${sprint.status==='planning'?`<button class="btn btn-primary btn-sm" onclick="startSprint(event,'${sprint.id}')">Start Sprint</button>`:''}
+        ${sprint.status==='active'?`<button class="btn btn-ghost btn-sm" onclick="completeSprint(event,'${sprint.id}')">Complete</button>`:''}
+      </div>
+      ${sprint.goal ? `<div class="sprint-goal">${escapeHtml(sprint.goal)}</div>` : ''}
+      <div class="sprint-dates">📅 ${sprint.startDate} → ${sprint.endDate}</div>
+      <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap">
+        <span class="burndown-stat">Issues: <strong>${issues.length}</strong></span>
+        <span class="burndown-stat">Total Points: <strong>${total}</strong></span>
+        <span class="burndown-stat">Completed: <strong>${done}</strong></span>
+        <span class="burndown-stat">Remaining: <strong>${total-done}</strong></span>
+      </div>
+      <div style="margin-top:10px"><div class="progress-bar" style="height:6px"><div class="progress-fill" style="width:${total?Math.round(done/total*100):0}%"></div></div></div>
+    </div>`;
+  });
+  html += `<button class="btn btn-ghost" onclick="openCreateSprint()" style="align-self:flex-start">+ Create Sprint</button>`;
+  html += '</div>';
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+// ---- REPORTS ----
+function renderReports() {
+  const total = data.issues.length;
+  const byStatus = {};
+  STATUSES.forEach(s => byStatus[s] = data.issues.filter(i=>i.status===s).length);
+  const byPriority = {};
+  ['Highest','High','Medium','Low','Lowest'].forEach(p => byPriority[p] = data.issues.filter(i=>i.priority===p).length);
+  const byEpic = {};
+  data.epics.forEach(ep => byEpic[ep.id] = { name: ep.name, color: ep.color, count: data.issues.filter(i=>i.epicId===ep.id).length });
+  const totalPts = data.issues.reduce((a,i)=>a+(i.points||0),0);
+  const donePts = data.issues.filter(i=>i.status==='done').reduce((a,i)=>a+(i.points||0),0);
+
+  document.getElementById('mainContent').innerHTML = `<div class="reports">
+    <div class="report-card">
+      <h3>📊 Status Breakdown</h3>
+      ${STATUSES.map(s => `<div class="stat-row"><span>${STATUS_LABELS[s]}</span><span class="stat-val">${byStatus[s]}</span></div>`).join('')}
+      <div class="stat-row" style="margin-top:6px"><span>Total</span><span class="stat-val">${total}</span></div>
+    </div>
+    <div class="report-card">
+      <h3>⚡ Priority Distribution</h3>
+      ${['Highest','High','Medium','Low','Lowest'].map(p => `<div class="stat-row">
+        <span>${priorityIcon(p)} ${p}</span><span class="stat-val">${byPriority[p]}</span></div>`).join('')}
+    </div>
+    <div class="report-card">
+      <h3>🏷️ Issues by Epic</h3>
+      ${data.epics.map(ep => `<div class="stat-row">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${ep.color};margin-right:6px"></span>${ep.name}</span>
+        <span class="stat-val">${byEpic[ep.id].count}</span></div>`).join('')}
+      <div class="stat-row"><span>Unepiced</span><span class="stat-val">${data.issues.filter(i=>!i.epicId).length}</span></div>
+    </div>
+    <div class="report-card">
+      <h3>🔥 Sprint Velocity</h3>
+      ${data.sprints.map(s => {
+        const iss = data.issues.filter(i=>i.sprintId===s.id);
+        const sp = iss.reduce((a,i)=>a+(i.points||0),0);
+        const dp = iss.filter(i=>i.status==='done').reduce((a,i)=>a+(i.points||0),0);
+        const badgeClass = s.status==='active'?'badge-active':s.status==='completed'?'badge-completed':'badge-planning';
+        return `<div class="stat-row"><span>${s.name} <span class="sprint-badge ${badgeClass}" style="font-size:10px">${s.status}</span></span><span class="stat-val">${dp}/${sp} pts</span></div>`;
+      }).join('')}
+      <div class="stat-row" style="margin-top:6px"><span>Overall completion</span><span class="stat-val">${totalPts?Math.round(donePts/totalPts*100):0}%</span></div>
+    </div>
+    <div class="report-card">
+      <h3>👤 Assignee Workload</h3>
+      ${data.members.map(m => {
+        const assigned = data.issues.filter(i=>i.assigneeId===m.id&&i.status!=='done').length;
+        const pts = data.issues.filter(i=>i.assigneeId===m.id&&i.status!=='done').reduce((a,i)=>a+(i.points||0),0);
+        return `<div class="stat-row"><span>${avatarEl(m.id)} <span style="margin-left:6px">${m.name}</span></span><span class="stat-val">${assigned} issues (${pts} pts)</span></div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+// ---- ISSUE DETAIL ----
+function openIssue(id) {
+  activeIssueId = id;
+  const issue = getIssue(id);
+  if (!issue) return;
+
+  document.getElementById('detailKeyBadge').textContent = issue.key;
+  document.getElementById('detailTitle').value = issue.title;
+  document.getElementById('detailStatus').value = issue.status;
+  document.getElementById('detailPriority').value = issue.priority;
+  document.getElementById('detailPoints').value = issue.points || '';
+  document.getElementById('detailDesc').value = issue.description || '';
+  document.getElementById('detailType').value = issue.type || 'story';
+
+  // Epic dropdown
+  const epSel = document.getElementById('detailEpic');
+  epSel.innerHTML = '<option value="">None</option>';
+  data.epics.forEach(ep => epSel.innerHTML += `<option value="${ep.id}"${issue.epicId===ep.id?' selected':''}>${ep.name}</option>`);
+
+  // Assignee dropdown
+  const asSel = document.getElementById('detailAssignee');
+  asSel.innerHTML = '<option value="">Unassigned</option>';
+  data.members.forEach(m => asSel.innerHTML += `<option value="${m.id}"${issue.assigneeId===m.id?' selected':''}>${m.name}</option>`);
+
+  // Sprint dropdown
+  const spSel = document.getElementById('detailSprint');
+  spSel.innerHTML = '<option value="">Backlog</option>';
+  data.sprints.forEach(s => spSel.innerHTML += `<option value="${s.id}"${issue.sprintId===s.id?' selected':''}>${s.name}</option>`);
+
+  renderSubtasks(issue);
+  renderComments(issue);
+
+  document.getElementById('detailDates').innerHTML =
+    `Created: ${formatDate(issue.createdAt)}<br>Updated: ${formatDate(issue.updatedAt)}`;
+
+  document.getElementById('detailOverlay').classList.remove('hidden');
+}
+
+function renderSubtasks(issue) {
+  const list = document.getElementById('subtaskList');
+  list.innerHTML = '';
+  (issue.subtasks || []).forEach(st => {
+    const div = document.createElement('div');
+    div.className = 'subtask-row';
+    div.innerHTML = `<input type="checkbox" ${st.done?'checked':''} onchange="toggleSubtask('${st.id}', this.checked)">
+      <span class="subtask-text${st.done?' done':''}">${escapeHtml(st.title)}</span>
+      <button class="btn-icon" onclick="deleteSubtask('${st.id}')" title="Delete" style="font-size:14px;padding:2px">✕</button>`;
+    list.appendChild(div);
+  });
+}
+
+function renderComments(issue) {
+  const list = document.getElementById('commentList');
+  list.innerHTML = '';
+  (issue.comments || []).forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'comment-row';
+    div.innerHTML = `<div class="comment-meta">${c.author} · ${formatDateShort(c.createdAt)}</div>
+      <div class="comment-text">${escapeHtml(c.text)}</div>`;
+    list.appendChild(div);
+  });
+}
+
+function saveDetail() {
+  if (!activeIssueId) return;
+  const issue = getIssue(activeIssueId);
+  if (!issue) return;
+  issue.title = document.getElementById('detailTitle').value.trim() || issue.title;
+  issue.status = document.getElementById('detailStatus').value;
+  issue.priority = document.getElementById('detailPriority').value;
+  issue.epicId = document.getElementById('detailEpic').value || null;
+  issue.points = parseInt(document.getElementById('detailPoints').value) || 0;
+  issue.assigneeId = document.getElementById('detailAssignee').value || null;
+  issue.sprintId = document.getElementById('detailSprint').value || null;
+  issue.description = document.getElementById('detailDesc').value;
+  issue.type = document.getElementById('detailType').value;
+  issue.updatedAt = new Date().toISOString();
+  document.getElementById('detailDates').innerHTML =
+    `Created: ${formatDate(issue.createdAt)}<br>Updated: ${formatDate(issue.updatedAt)}`;
+  saveData();
+  render();
+}
+
+function addSubtask() {
+  const input = document.getElementById('newSubtask');
+  const title = input.value.trim();
+  if (!title || !activeIssueId) return;
+  const issue = getIssue(activeIssueId);
+  if (!issue) return;
+  if (!issue.subtasks) issue.subtasks = [];
+  issue.subtasks.push({ id: 'st'+Date.now(), title, done: false });
+  issue.updatedAt = new Date().toISOString();
+  input.value = '';
+  saveData();
+  renderSubtasks(issue);
+}
+
+function toggleSubtask(stId, done) {
+  if (!activeIssueId) return;
+  const issue = getIssue(activeIssueId);
+  if (!issue) return;
+  const st = (issue.subtasks||[]).find(s => s.id === stId);
+  if (st) { st.done = done; issue.updatedAt = new Date().toISOString(); saveData(); renderSubtasks(issue); }
+}
+
+function deleteSubtask(stId) {
+  if (!activeIssueId) return;
+  const issue = getIssue(activeIssueId);
+  if (!issue) return;
+  issue.subtasks = (issue.subtasks||[]).filter(s => s.id !== stId);
+  issue.updatedAt = new Date().toISOString();
+  saveData();
+  renderSubtasks(issue);
+}
+
+function addComment() {
+  const textarea = document.getElementById('newComment');
+  const text = textarea.value.trim();
+  if (!text || !activeIssueId) return;
+  const issue = getIssue(activeIssueId);
+  if (!issue) return;
+  if (!issue.comments) issue.comments = [];
+  issue.comments.push({ id: 'c'+Date.now(), text, author: 'You', createdAt: new Date().toISOString() });
+  issue.updatedAt = new Date().toISOString();
+  textarea.value = '';
+  saveData();
+  renderComments(issue);
+  document.getElementById('detailDates').innerHTML =
+    `Created: ${formatDate(issue.createdAt)}<br>Updated: ${formatDate(issue.updatedAt)}`;
+  render();
+}
+
+// ---- CREATE ISSUE ----
+function openCreateIssue(defaultStatus) {
+  // Populate selects
+  const epSel = document.getElementById('createEpic');
+  epSel.innerHTML = '<option value="">None</option>';
+  data.epics.forEach(ep => epSel.innerHTML += `<option value="${ep.id}">${ep.name}</option>`);
+  const asSel = document.getElementById('createAssignee');
+  asSel.innerHTML = '<option value="">Unassigned</option>';
+  data.members.forEach(m => asSel.innerHTML += `<option value="${m.id}">${m.name}</option>`);
+  const spSel = document.getElementById('createSprint');
+  spSel.innerHTML = '<option value="">Backlog</option>';
+  data.sprints.forEach(s => spSel.innerHTML += `<option value="${s.id}">${s.name}</option>`);
+  if (defaultStatus) document.getElementById('createStatus').value = defaultStatus;
+  // Pre-select active sprint
+  const active = data.sprints.find(s => s.status === 'active');
+  if (active) spSel.value = active.id;
+  document.getElementById('createTitle').value = '';
+  document.getElementById('createPoints').value = '';
+  document.getElementById('createOverlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('createTitle').focus(), 100);
+}
+
+function submitCreateIssue() {
+  const title = document.getElementById('createTitle').value.trim();
+  if (!title) { showToast('Title is required'); return; }
+  const num = data._nextIssueNum++;
+  const issue = {
+    id: 'i'+Date.now(),
+    key: data.project.key + '-' + num,
+    title,
+    type: document.getElementById('createType').value,
+    status: document.getElementById('createStatus').value,
+    priority: document.getElementById('createPriority').value,
+    epicId: document.getElementById('createEpic').value || null,
+    sprintId: document.getElementById('createSprint').value || null,
+    points: parseInt(document.getElementById('createPoints').value) || 0,
+    assigneeId: document.getElementById('createAssignee').value || null,
+    description: '',
+    subtasks: [],
+    comments: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  data.issues.push(issue);
+  saveData();
+  closeModal('createOverlay');
+  render();
+  showToast(`Created ${issue.key}`);
+}
+
+// ---- CREATE SPRINT ----
+function openCreateSprint() {
+  const today = new Date().toISOString().slice(0,10);
+  const twoWeeks = new Date(Date.now()+14*86400000).toISOString().slice(0,10);
+  document.getElementById('sprintName').value = `Sprint ${data.sprints.length + 1}`;
+  document.getElementById('sprintGoal').value = '';
+  document.getElementById('sprintStart').value = today;
+  document.getElementById('sprintEnd').value = twoWeeks;
+  document.getElementById('sprintOverlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('sprintName').focus(), 100);
+}
+
+function submitCreateSprint() {
+  const name = document.getElementById('sprintName').value.trim();
+  if (!name) { showToast('Sprint name required'); return; }
+  data.sprints.push({
+    id: 'sp'+Date.now(),
+    name,
+    goal: document.getElementById('sprintGoal').value.trim(),
+    startDate: document.getElementById('sprintStart').value,
+    endDate: document.getElementById('sprintEnd').value,
+    status: 'planning'
+  });
+  saveData();
+  closeModal('sprintOverlay');
+  render();
+  showToast(`Sprint "${name}" created`);
+}
+
+// ---- MODAL HELPERS ----
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+  if (id === 'detailOverlay') { activeIssueId = null; render(); }
+}
+
+function handleOverlayClick(e, id) {
+  if (e.target.id === id) closeModal(id);
+}
+
+// ---- KEYBOARD SHORTCUTS ----
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'n' || e.key === 'N') openCreateIssue();
+  if (e.key === 'Escape') {
+    ['detailOverlay','createOverlay','sprintOverlay'].forEach(id => {
+      if (!document.getElementById(id).classList.contains('hidden')) closeModal(id);
+    });
+  }
+});
+
+// Save detail on title blur
+document.getElementById('detailTitle').addEventListener('blur', saveDetail);
+
+// ---- TOAST ----
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ---- UTILS ----
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ---- INIT ----
+loadData();
+populateFilters();
+renderSidebar();
+render();
+</script>
+</body>
+</html>

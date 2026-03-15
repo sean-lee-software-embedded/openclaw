@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦞 Daily Brief</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { padding: 20px 24px 16px; border-bottom: 1px solid #1e2535; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 1.3rem; font-weight: 700; }
+  .update-time { font-size: 0.8rem; color: #64748b; background: #1e2535; padding: 4px 12px; border-radius: 20px; }
+  .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+  .section { margin-bottom: 40px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #1e2535; }
+  .section-icon { font-size: 1.4rem; }
+  .section-title { font-size: 1.05rem; font-weight: 700; }
+  .section-count { font-size: 0.75rem; color: #64748b; background: #1e2535; padding: 2px 8px; border-radius: 20px; }
+  .cards { display: flex; flex-direction: column; gap: 10px; }
+  .card { background: #1e2535; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; transition: border-color 0.15s; }
+  .card:hover { border-color: #3b82f6; }
+  .card-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+  .card-body { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; margin-bottom: 10px; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+  .source-tag { font-size: 0.72rem; background: #0f1117; color: #64748b; border: 1px solid #2d3748; padding: 2px 10px; border-radius: 20px; }
+  .read-link { font-size: 0.78rem; color: #3b82f6; text-decoration: none; }
+  .read-link:hover { text-decoration: underline; }
+  .tag { display: inline-block; font-size: 0.7rem; padding: 2px 9px; border-radius: 20px; font-weight: 600; margin-right: 4px; }
+  .tag-nvidia { background: #0c2a1a; color: #4ade80; }
+  .tag-dell { background: #1e2a4a; color: #60a5fa; }
+  .tag-compal { background: #2d1f0a; color: #fb923c; }
+  .tag-inventec { background: #2a0a2a; color: #e879f9; }
+  .tag-openbmc { background: #0a2020; color: #22d3ee; }
+  .tag-redfish { background: #1a1a0a; color: #facc15; }
+  .tag-ai { background: #1a0a2a; color: #a78bfa; }
+  .tag-openai { background: #0a1a0a; color: #4ade80; }
+  .tag-google { background: #1a100a; color: #fb923c; }
+  .tag-deepseek { background: #0a0a2a; color: #818cf8; }
+  .highlight { background: linear-gradient(135deg, #1e2535, #1e3a5f); border-color: #3b82f6; }
+  @media (max-width: 600px) { header { padding: 14px 16px; } .container { padding: 16px 12px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span style="font-size:1.5rem">🦞</span>
+    <h1>Daily Brief</h1>
+  </div>
+  <span class="update-time">更新時間：2026-03-15 00:19 GMT+8</span>
+</header>
+
+<div class="container">
+
+  <!-- Section 1: Cloud Server -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🖥️</span>
+      <span class="section-title">Cloud Server 市場趨勢</span>
+      <span class="section-count">4 條</span>
+    </div>
+    <div class="cards">
+
+      <div class="card highlight">
+        <div class="card-title">NVIDIA GTC 2026：Rubin 架構亮相，Feynman 路線圖曝光</div>
+        <div class="card-body">NVIDIA 在 CES 2026 推出 Rubin 架構，每瓦能源效率比上一代提升 40%，將六個專業晶片整合進機架級系統。GTC 2026 預計同步發布 Rubin → Feynman（1nm，預計 2028）完整路線圖。另投資 20 億美元於雲端基礎設施公司 Nebius 擴大 AI 資料中心容量。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-nvidia">NVIDIA</span></div>
+          <a class="read-link" href="https://www.trendforce.com/news/2026/03/13/news-nvidia-may-offer-first-look-at-feynman-at-gtc-2026-tsmc-a16-and-taiwan-supply-chain-in-focus/" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Dell AI 伺服器爆發：FY2026 訂單達 641 億美元，FY2027 目標 500 億</div>
+        <div class="card-body">Dell FY2026 AI 伺服器銷售額 245.6 億美元，是上一年的 2.5 倍，積壓訂單達 430 億美元。FY2027 預計 AI 相關收入突破 500 億美元（年增約 100%）。傳統 PowerEdge 系統也同步成長 5.8%，達 184.1 億美元。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-dell">DELL</span></div>
+          <a class="read-link" href="https://www.nextplatform.com/compute/2026/03/01/ai-servers-finally-dominate-dells-systems-business/4093058" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">仁寶 GTC 2026 展示機架級 AI 基礎設施，伺服器收入目標 2027 年佔 20%</div>
+        <div class="card-body">仁寶推出高密度液冷 AI 伺服器，搭載 NVIDIA GB300 架構平台。AI 伺服器已進入量產，預計今年伺服器收入佔比超 10%，2027 年達 20%。資本支出大幅提升至 180 億新台幣，在台灣、越南、美國擴建產線。GTC 2026 展示「一體化解決方案」機架架構。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-compal">仁寶</span></div>
+          <a class="read-link" href="https://www.prnewswire.com/news-releases/compal-showcases-one-integrated-solution-rack-level-ai-infrastructure-architecture-and-cross-domain-applications-at-nvidia-gtc-2026-302712140.html" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">英業達 2026 資本支出翻倍至 10 億美元，美國新廠上半年投產</div>
+        <div class="card-body">英業達 AI 伺服器業務預計延續 2025 年 40% 的增長勢頭。美國新廠 2026 上半年投產，專注高階 AI 伺服器組裝。業務從 L6 主機板製造升級至 L10/L11 機架整合，對應 NVIDIA GB 系列以機架為最小交付單位的趨勢。AI 伺服器預計佔 2026 年伺服器收入 50%+。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-inventec">英業達</span></div>
+          <a class="read-link" href="https://www.digitimes.com/news/a20260311PD203/inventec-capex-north-america-expansion-2026.html" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 2: OpenBMC / Redfish -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">⚙️</span>
+      <span class="section-title">OpenBMC / Redfish</span>
+      <span class="section-count">4 條</span>
+    </div>
+    <div class="cards">
+
+      <div class="card highlight">
+        <div class="card-title">DMTF Redfish Release 2025.4 發布（2026 年 2 月）</div>
+        <div class="card-body">包含 28 個 schema 更新，新增 NVMe Personality Support、網路轉接器 port aggregation、初步 UALink 支援。DMTF 已舉辦 webinar 說明本次更新內容。Redfish Publications Repository（GitHub）持續同步最新 schema 與 Message Registry。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-redfish">Redfish</span></div>
+          <a class="read-link" href="https://www.dmtf.org/sites/default/files/DMTF_Newsletter_February_2026.pdf" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Wiwynn：用 PLDM + Redfish 統一韌體更新流程</div>
+        <div class="card-body">Wiwynn 2025 年 10 月白皮書詳述如何以 PLDM 和 Redfish 架構取代 OpenBMC 中碎片化的韌體更新工具，實現統一管理流程。同期有演講示範用 Redfish API 對大量節點進行滾動式韌體升級，並整合 OpenBMC sensors 和 KVM 至監控 dashboard。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-openbmc">OpenBMC</span><span class="tag tag-redfish">Redfish</span></div>
+          <a class="read-link" href="https://www.wiwynn.com/whitepapers/introduction-of-a-new-firmware-update-workflow-for-pldm-and-redfish" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">學習資源推薦：OpenBMC Redfish Cheatsheet + Class Central 課程</div>
+        <div class="card-body">OpenBMC GitHub docs 提供 REDFISH-cheatsheet.md，整理常用 Redfish 指令快速參考。Class Central 2026 課程涵蓋資料中心管理、伺服器自動化、儲存編排和 OpenBMC 整合，來源包括 Open Compute Project、Red Hat、Linux Foundation。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-openbmc">OpenBMC</span></div>
+          <a class="read-link" href="https://github.com/openbmc/docs/blob/master/architecture/code-update/firmware-update-over-redfish.md" target="_blank">GitHub Docs →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ARM Neoverse RD-V3 上的 OpenBMC + UEFI 前矽模擬驗證</div>
+        <div class="card-body">ARM 社群部落格（2025 年 10 月）介紹在 Neoverse RD-V3 平台上進行 OpenBMC + UEFI 的前矽模擬，可在沒有實體硬體的情況下驗證包含 Redfish 服務在內的 BMC 功能，對韌體開發者有相當參考價值。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-openbmc">OpenBMC</span></div>
+          <a class="read-link" href="https://developer.arm.com/community/arm-community-blogs/b/servers-and-cloud-computing-blog/posts/pre-silicon-simulation-and-validation-of-openbmc-uefi-on-neoverse-rd-v3" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 3: AI News -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🤖</span>
+      <span class="section-title">AI 最新消息</span>
+      <span class="section-count">6 條</span>
+    </div>
+    <div class="cards">
+
+      <div class="card highlight">
+        <div class="card-title">DeepSeek-V4 突襲上線：多模態全能、API 價格僅 GPT-4o 十分之一</div>
+        <div class="card-body">3 月 12 日全量上線，原生支援文字、圖像、視頻、音頻全能生成。推理能力對標 OpenAI O3，部分中文場景表現更優。混合架構支援百萬 token 超長上下文，推理速度提升 5 倍，代碼能力大幅增強。API 定價極具競爭力，性價比碾壓。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-deepseek">DeepSeek</span></div>
+          <a class="read-link" href="https://caifuhao.eastmoney.com/news/20260313171019722984100" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Anthropic Claude 4.0 發布，記憶功能全面開放</div>
+        <div class="card-body">Claude 4.0 以「宪法 AI」訓練方法平衡安全與實用，敏感話題處理更穩健，創意寫作和深度分析表現出色。Claude Opus 4.6 GPQA 得分 91.9%，Claude Sonnet 5 定位為編碼專家。記憶功能（原本僅付費用戶）現向所有 Claude 用戶開放。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-ai">Anthropic</span></div>
+          <a class="read-link" href="https://blog.mean.ceo/new-ai-model-releases-news-march-2026/" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Google Gemini 3.1 Pro：16 項主要基準測試拿下 13 項第一</div>
+        <div class="card-body">2 月 19 日推出，多模態能力（尤其視頻理解和跨語言）強勢。同步推出 Flash-Lite，速度最快、性價比最高，透過 Google AI Studio 和 Vertex AI 開放開發者使用。Google Maps 「Ask Maps」功能也整合 Gemini，支援對話式地圖查詢。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-google">Google</span></div>
+          <a class="read-link" href="https://www.mangomindbd.com/blog/march-2026-ai-benchmarks/" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">OpenAI GPT-5.2/5.3：200 萬 token 上下文，更少過度防守</div>
+        <div class="card-body">GPT-5.2 上下文窗口擴展至 200 萬 token，推理、代碼生成和多模態理解保持領先，但成本較高。GPT-5.3 Instant 著重改善對話語氣和流暢度，減少不必要的拒答和說教式回應，提供更有事實依據的答案。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-openai">OpenAI</span></div>
+          <a class="read-link" href="https://news.softunis.com/53369.html" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">NVIDIA 宣布 5 年投入 260 億美元開源 AI 大模型研發</div>
+        <div class="card-body">標誌著 NVIDIA 從「晶片製造商」向「全棧式 AI 頂尖實驗室」的戰略轉型。將採取「開放權重」中間路線，公開模型關鍵參數供企業和開發者免費下載、運行和微調。重點研發多模態、多領域前沿大模型。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-nvidia">NVIDIA</span><span class="tag tag-ai">AI</span></div>
+          <a class="read-link" href="https://www.tmtpost.com/7914242.html" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Yann LeCun 離開 Meta 創立 AMI Labs，完成 10.3 億美元種子輪</div>
+        <div class="card-body">圖靈獎得主 Yann LeCun 創立 AMI Labs，致力於基於 JEPA 架構的「世界模型」研發，應用於工業、機器人和醫療保健領域。全球頂尖 AI 實驗室押注世界模型，被視為通往 AGI 的重要一步。</div>
+        <div class="card-footer">
+          <div><span class="tag tag-ai">AI</span></div>
+          <a class="read-link" href="https://futurumgroup.com/insights/yann-lecuns-ami-raises-1bn-seed-round-is-the-world-model-era-finally-here/" target="_blank">閱讀原文 →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
