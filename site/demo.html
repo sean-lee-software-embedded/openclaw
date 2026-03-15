@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Board Demo</title>
+  <style>
+    :root{--bg:#0d1117;--panel:#161b22;--card:#1c2333;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--border:#30363d;}
+    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1100px;margin:0 auto;padding:28px 18px 40px}
+    h1{margin:0 0 10px;font-size:30px} p{color:var(--muted);line-height:1.6}
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px}
+    .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:white;background:var(--accent)}
+    .btn.secondary{background:transparent;border:1px solid var(--border);color:var(--text)}
+    .shots{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+    .shot{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+    .shot iframe{width:100%;height:260px;border:0;background:white}
+    .label{padding:10px 12px;font-size:13px;color:var(--muted);border-top:1px solid var(--border)}
+    ol{margin:8px 0 0 20px;color:var(--muted)} li{margin:8px 0}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#1f6feb22;color:#7cc0ff;border:1px solid #1f6feb44;font-size:12px;margin-right:8px}
+    @media (max-width:900px){.hero,.shots{grid-template-columns:1fr}.shot iframe{height:320px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="panel">
+        <div class="badge">GitHub Pages Demo</div><div class="badge">Jira-like Board</div>
+        <h1>Project Board Demo</h1>
+        <p>這頁是給 demo 用的入口。你可以直接打開 Board 和 Daily Brief，也可以照著下面的 60 秒講稿走一遍。</p>
+        <div class="cta">
+          <a class="btn" href="./board.html">Open Board</a>
+          <a class="btn secondary" href="./news.html">Open Daily Brief</a>
+        </div>
+      </div>
+      <div class="panel">
+        <strong>60 秒 demo script</strong>
+        <ol>
+          <li>先打開 Board，展示 <b>Board / Backlog / Sprints / Reports</b> 四個 view。</li>
+          <li>在 Board 裡拖動一張卡片，示範 status 流轉。</li>
+          <li>點開一張 issue，展示 <b>description / sub-task / comments / assignee / sprint</b>。</li>
+          <li>切到 Backlog，示範 issue 可直接移到 sprint。</li>
+          <li>切到 Sprints，完成 sprint 並處理 unfinished issues。</li>
+          <li>最後打開 Daily Brief，展示每天自動更新的新聞頁。</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="shots">
+      <div class="shot">
+        <iframe src="./board.html"></iframe>
+        <div class="label">Board view</div>
+      </div>
+      <div class="shot">
+        <iframe src="./board.html#backlog"></iframe>
+        <div class="label">Backlog / Sprint planning</div>
+      </div>
+      <div class="shot">
+        <iframe src="./news.html"></iframe>
+        <div class="label">Daily Brief</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
