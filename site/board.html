@@ -552,32 +552,32 @@ function seedData() {
         subtasks: [{ id: 'st8', title: 'Line chart component', done: false }, { id: 'st9', title: 'Pie chart component', done: false }, { id: 'st10', title: 'Connect to API', done: false }],
         comments: [],
         createdAt: new Date(Date.now()-86400000).toISOString(), updatedAt: new Date(Date.now()-86400000).toISOString() },
-      { id: 'i7', key: 'PRJ-7', title: 'Restore board management entry points', type: 'task', status: 'todo',
-        priority: 'Highest', epicId: null, sprintId: null, points: 3, assigneeId: null,
+      { id: 'i7', key: 'PRJ-7', title: 'Restore board management entry points', type: 'task', status: 'inprogress',
+        priority: 'Highest', epicId: null, sprintId: 's1', points: 3, assigneeId: null,
         parentId: null,
         description: 'Ensure board has visible, working entry points for Project / Epic / Member management without blocking the main UI.',
         subtasks: [], comments: [],
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 'i8', key: 'PRJ-8', title: 'Convert study links to markdown-first readable flow', type: 'task', status: 'todo',
-        priority: 'High', epicId: null, sprintId: null, points: 2, assigneeId: null,
+      { id: 'i8', key: 'PRJ-8', title: 'Convert study links to markdown-first readable flow', type: 'task', status: 'inprogress',
+        priority: 'High', epicId: null, sprintId: 's1', points: 2, assigneeId: null,
         parentId: null,
         description: 'Make study materials easy to read using markdown-first links and remove broken HTML as the primary path.',
         subtasks: [], comments: [],
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 'i9', key: 'PRJ-9', title: 'Publish readable study packs on GitHub Pages', type: 'story', status: 'todo',
-        priority: 'Highest', epicId: null, sprintId: null, points: 5, assigneeId: null,
+      { id: 'i9', key: 'PRJ-9', title: 'Publish readable study packs on GitHub Pages', type: 'story', status: 'inprogress',
+        priority: 'Highest', epicId: null, sprintId: 's1', points: 5, assigneeId: null,
         parentId: null,
         description: 'Expose OpenBMC, cloud server, and OpenClaw study packs in a way that is easy to review on phone and browser.',
         subtasks: [], comments: [],
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 'i10', key: 'PRJ-10', title: 'Define safe iPhone dashboard access path', type: 'story', status: 'todo',
-        priority: 'High', epicId: null, sprintId: null, points: 5, assigneeId: null,
+      { id: 'i10', key: 'PRJ-10', title: 'Define safe iPhone dashboard access path', type: 'story', status: 'inreview',
+        priority: 'High', epicId: null, sprintId: 's1', points: 5, assigneeId: null,
         parentId: null,
         description: 'Decide and document a stable dashboard access path for iPhone, likely via Tailscale or HTTPS instead of LAN HTTP.',
         subtasks: [], comments: [],
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
       { id: 'i11', key: 'PRJ-11', title: 'Redesign board persistence for cross-device tracking', type: 'story', status: 'todo',
-        priority: 'High', epicId: null, sprintId: null, points: 8, assigneeId: null,
+        priority: 'High', epicId: null, sprintId: 's1', points: 8, assigneeId: null,
         parentId: null,
         description: 'Replace localStorage-only behavior with a shared ticket source so board changes are visible across devices.',
         subtasks: [], comments: [],
@@ -592,6 +592,26 @@ function loadData() {
     const raw = localStorage.getItem(STORAGE_KEY);
     data = raw ? JSON.parse(raw) : seedData();
     if (!data._nextIssueNum) data._nextIssueNum = data.issues.length + 1;
+    const wanted = {
+      'PRJ-7': {status:'inprogress', sprintId:'s1'},
+      'PRJ-8': {status:'inprogress', sprintId:'s1'},
+      'PRJ-9': {status:'inprogress', sprintId:'s1'},
+      'PRJ-10': {status:'inreview', sprintId:'s1'},
+      'PRJ-11': {status:'todo', sprintId:'s1'}
+    };
+    const seeded = seedData().issues.filter(i => wanted[i.key]);
+    const byKey = { ...wanted };
+    for (const si of seeded) {
+      const ex = data.issues.find(i => i.key === si.key);
+      if (ex) {
+        ex.status = byKey[si.key].status;
+        ex.sprintId = byKey[si.key].sprintId;
+      } else {
+        si.status = byKey[si.key].status;
+        si.sprintId = byKey[si.key].sprintId;
+        data.issues.push(si);
+      }
+    }
   } catch(e) { data = seedData(); }
 }
 
