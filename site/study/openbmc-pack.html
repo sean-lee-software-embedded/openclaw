@@ -1,0 +1,566 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:920px;margin:0 auto;padding:28px 18px;line-height:1.7;background:#0b1220;color:#e6edf3}a{color:#7cc0ff}h1,h2,h3{color:#fff}pre{background:#111827;padding:14px;border-radius:12px;overflow:auto}code{font-family:ui-monospace,monospace}ul{padding-left:22px}p,li{color:#cbd5e1}</style></head><body><h1>OpenBMC 1 週衝刺學習包</h1>
+<p>對象：有多年 embedded 經驗、曾熟 Redfish，但約 5 年沒碰；目前目標是**盡快能看懂 OpenBMC 專案、能追 issue、能改 Yocto/服務、能跟 MCTP/PLDM/CI 團隊對話**。</p>
+<p>---</p>
+<h2>0. 先講結論：這 1 週最值得抓住的主線</h2>
+<p>如果只記 4 件事：</p>
+<p>1. **OpenBMC 本質上是 Yocto 產出的 Linux 發行版**，不是單一 daemon。  </p>
+<p>2. **資料真相多半在 D-Bus**；`bmcweb` 多半是把 D-Bus/服務狀態翻成 Redfish/REST。  </p>
+<p>3. **Host/BMC/周邊管理通道正在從 IPMI 轉向 MCTP + PLDM**；MCTP 是 transport，PLDM 是 message/data model。  </p>
+<p>4. **做事效率關鍵不在懂完 Yocto，而在知道哪幾層、哪幾個 recipe、哪幾個 cache、哪幾條 pipeline 會動到。**</p>
+<p>---</p>
+<h2>1. Redfish：這 5 年實務上變了什麼？</h2>
+<p>你如果 5 年前停在「系統、電源、風扇、帳號、更新、基本 Event」那一代，現在重點不是核心精神變了，而是：</p>
+<h3>1.1 Redfish 已更成熟成為「完整管理平面」</h3>
+<p>過去比較像 modernized IPMI/REST API；現在更明顯變成：</p>
+<ul>
+<li>**完整 schema 生態**更大</li>
+<li>**互通性要求更高**（Interop Profile / validator / conformance）</li>
+<li>**事件、遙測、證書、更新流程**更完整</li>
+<li>與 **CXL、Fabric、組態匯出匯入、aggregation/composability** 的整合更實用</li>
+</ul>
+<h3>1.2 實務上你要補的 delta</h3>
+<p>#### A. Telemetry 比以前重要很多</p>
+<p>以前常停在 sensor pull；現在要補的是：</p>
+<ul>
+<li>`TelemetryService`</li>
+<li>metric report / trigger</li>
+<li>event 與 metric report 的串接</li>
+<li>bulk telemetry / streaming 的方向</li>
+</ul>
+<p>對 BMC 團隊的意義：</p>
+<ul>
+<li>不只是「能讀 sensor」；而是要能設計**可訂閱、可批次取用、可送出報表**的資料流。</li>
+</ul>
+<p>#### B. Event 模型更成熟</p>
+<p>現在要熟的是：</p>
+<ul>
+<li>EventService / EventDestination</li>
+<li>訂閱過濾</li>
+<li>push event</li>
+<li>metric report event</li>
+<li>與 journal/log service 的對映</li>
+</ul>
+<p>在 OpenBMC 裡，這通常不是獨立資料庫概念，而是跟 `bmcweb`、log service、D-Bus state 對映有關。</p>
+<p>#### C. 憑證/安全能力更完整</p>
+<p>近幾年實務上更常看到：</p>
+<ul>
+<li>certificate lifecycle</li>
+<li>CSR / certificate install</li>
+<li>自動 enrollment（SCEP / ACME 方向）</li>
+<li>service TLS / mTLS 管理</li>
+<li>帳號、權限、security mode 類 schema 增長</li>
+</ul>
+<p>如果你以前把 Redfish 當「管理資料 API」，現在要把它也看成**安全控制平面的一部分**。</p>
+<p>#### D. Firmware Update / 組態管理比以前更像正式產品能力</p>
+<p>你要注意：</p>
+<ul>
+<li>staged update / multipart upload / image store 類能力</li>
+<li>服務組態匯入/匯出</li>
+<li>多裝置/大規模更新情境</li>
+</ul>
+<p>這跟 OpenBMC 團隊最直接的交集是：</p>
+<ul>
+<li>`bmcweb` API 行為</li>
+<li>software manager / image activation</li>
+<li>後端 D-Bus 物件與 state machine</li>
+</ul>
+<p>#### E. Interoperability / conformance 壓力更實際</p>
+<p>這 5 年很明顯的一點是：</p>
+<ul>
+<li>不只是「有 API」就算完成</li>
+<li>要考慮 schema version、validator、profile、message registry</li>
+<li>客戶/測試會更常拿 Redfish validator、interop profile 來卡你</li>
+</ul>
+<p>**一句話總結：**  </p>
+<p>Redfish 沒有「改宗」，但已從 API 規格成長成**產品互通與管理自動化的核心介面**。</p>
+<p>---</p>
+<h2>2. OpenBMC 架構速覽：Redfish、bmcweb、D-Bus、MCTP、PLDM 在哪裡？</h2>
+<h3>2.1 心智模型</h3>
+<pre><code>
+外部管理工具 / 自動化 / 測試系統
+
+        |
+
+   HTTPS / Redfish / REST / WebSocket
+
+        |
+
+      bmcweb
+
+        |
+
+     D-Bus / systemd / services
+
+        |
+
+  各種 OpenBMC daemon 與 manager
+
+        |
+
+   MCTP transport  &lt;----&gt;  Host / NIC / satellite controller / PCIe 裝置
+
+        |
+
+      PLDM messages
+
+</code></pre>
+<h3>2.2 分層理解</h3>
+<p>#### 最外層：Redfish / REST</p>
+<ul>
+<li>對外 API 入口多由 **`bmcweb`** 提供</li>
+<li>`bmcweb` 同時承擔：</li>
+</ul>
+<p>  - Redfish</p>
+<p>  - OpenBMC REST</p>
+<p>  - websocket / event</p>
+<p>  - 某些 console / KVM 相關 web 能力</p>
+<p>#### 中間層：D-Bus</p>
+<ul>
+<li>OpenBMC 內部服務之間最核心的 IPC 是 **D-Bus**</li>
+<li>inventory、sensor、state、logging、software、network 等，多半用 D-Bus object / property / signal 表達</li>
+<li>**很多 Redfish 資料不是 bmcweb 自己算出來，而是從 D-Bus 讀出來再轉 schema**</li>
+</ul>
+<p>#### 服務層：各種 manager / daemon</p>
+<p>常見思路：</p>
+<ul>
+<li>某個 daemon 管 sensor / inventory / logging / software / state</li>
+<li>這些 daemon 在 D-Bus 上暴露物件</li>
+<li>`bmcweb` 把它們翻出去</li>
+</ul>
+<p>#### Host / device 通道層：MCTP + PLDM</p>
+<ul>
+<li>面向 host firmware、satellite controller、NIC、PCIe 裝置等「box 內管理通訊」時，OpenBMC 越來越常走 **MCTP + PLDM**</li>
+<li>**MCTP**：把不同實體媒介（I2C/SMBus、PCIe、UART…）抽象成共同 transport</li>
+<li>**PLDM**：在 MCTP 之上提供 inventory / sensor / control / FRU / firmware update 等標準訊息模型</li>
+</ul>
+<h3>2.3 你該怎麼看 OpenBMC 問題</h3>
+<p>#### 如果是「Redfish 回傳不對」</p>
+<p>先問：</p>
+<p>1. `bmcweb` route/schema mapping 有沒有問題？</p>
+<p>2. 對應的 D-Bus object/property 存不存在？</p>
+<p>3. 後端 daemon 有沒有把資料放上 D-Bus？</p>
+<p>#### 如果是「Host/BMC 裝置資料不對」</p>
+<p>先問：</p>
+<p>1. MCTP endpoint discovery / EID / routing 是否正常？</p>
+<p>2. PLDM requester/responder 流程是否正常？</p>
+<p>3. PLDM 資料有沒有正確轉成 D-Bus inventory / sensor / state？</p>
+<p>4. `bmcweb` 是否只是把上游錯資料照實翻出？</p>
+<p>**這是 OpenBMC debug 最重要的觀念：外面看 Redfish，裡面多半要追 D-Bus，再往下追 transport/protocol。**</p>
+<p>---</p>
+<h2>3. MCTP essentials：你要懂到什麼程度才算能工作？</h2>
+<h3>3.1 一句話定義</h3>
+<p>**MCTP = 管理訊息的傳輸層標準。**  </p>
+<p>它解決的是「管理訊息如何在不同裝置之間被送到正確 endpoint」，不是定義高層管理語意。</p>
+<h3>3.2 為什麼重要</h3>
+<p>IPMI 的問題之一是 transport 與 data model 綁太死，而且硬體通道限制多。MCTP 的價值在：</p>
+<ul>
+<li>把 **transport** 從高層 protocol 拆開</li>
+<li>可以跑在多種 physical binding 上</li>
+<li>以上層來看，只需要知道對方的 **EID（Endpoint ID）**</li>
+<li>為 PLDM、SPDM、NVMe-MI 等提供共同通道</li>
+</ul>
+<h3>3.3 你至少要熟的名詞</h3>
+<ul>
+<li>**EID**：MCTP endpoint 的邏輯位址</li>
+<li>**Bus owner**：負責 discovery / EID assignment / routing 管理的角色</li>
+<li>**Binding**：MCTP 跑在哪種媒介上，例如 SMBus/I2C、PCIe、serial</li>
+<li>**Message vs Packet**：大訊息可能被切成多個 packet 傳送，再重組</li>
+<li>**Routing / discovery**：多 endpoint 存在時，誰分配、誰找到誰</li>
+</ul>
+<h3>3.4 在 OpenBMC 裡它出現在哪</h3>
+<p>你會在這幾個層面看到它：</p>
+<ul>
+<li>kernel 或 userspace 的 MCTP stack</li>
+<li>MCTP daemon / socket API / D-Bus interface</li>
+<li>endpoint discovery</li>
+<li>給 `pldmd`、SPDM、裝置管理 daemon 當 transport</li>
+</ul>
+<p>OpenBMC 官方設計文件的方向是：</p>
+<ul>
+<li>**新設計偏向 kernel-based MCTP + sockets API**</li>
+<li>舊式 userspace demux 架構存在，但不建議新案採用</li>
+</ul>
+<h3>3.5 實務上要問的 5 個問題</h3>
+<p>1. 這條通道的 **binding** 是什麼？（SMBus / PCIe / UART / 其他）  </p>
+<p>2. 誰是 **bus owner**？  </p>
+<p>3. EID 是誰分的？是否穩定？  </p>
+<p>4. 上層傳的是 **PLDM / SPDM / vendor message** 哪一種？  </p>
+<p>5. 問題是在 **transport 不通**，還是上層 payload decode/handler 有錯？</p>
+<h3>3.6 對你最有價值的認知</h3>
+<p>如果你以前是 Redfish 強，MCTP 最大思維轉換是：</p>
+<ul>
+<li>Redfish 解的是 **northbound management API**</li>
+<li>MCTP 解的是 **inside-the-box management transport**</li>
+</ul>
+<p>兩者不是替代關係，是上下游關係。</p>
+<p>---</p>
+<h2>4. PLDM essentials：真正會用到的核心</h2>
+<h3>4.1 一句話定義</h3>
+<p>**PLDM = 跑在 MCTP 等 transport 上的平台管理訊息與資料模型。**</p>
+<h3>4.2 為什麼重要</h3>
+<p>PLDM 在 OpenBMC 特別重要，因為它更適合處理：</p>
+<ul>
+<li>平台 inventory</li>
+<li>sensors / effecters</li>
+<li>FRU</li>
+<li>firmware update</li>
+<li>BIOS/config</li>
+<li>BMC 與 host / add-on device / satellite MC 之間的標準互動</li>
+</ul>
+<h3>4.3 你至少要熟的 PLDM Type</h3>
+<p>對 OpenBMC 工作最常碰到的，不用一開始全背，先抓這些：</p>
+<ul>
+<li>**Base**：基礎能力、type/command、版本、TID 等</li>
+<li>**Platform Monitoring and Control**：sensors / effecters / PDRs</li>
+<li>**FRU Data**：裝置 FRU / inventory 資料</li>
+<li>**Firmware Update**：FW update 流程</li>
+<li>**BIOS / config**：平台設定與 BIOS 相關模型</li>
+</ul>
+<h3>4.4 sensors 與 effecters 是關鍵差異</h3>
+<p>比起 IPMI 的 sensor 偏監控導向，PLDM 很重要的一點是：</p>
+<ul>
+<li>**sensor** = 觀測</li>
+<li>**effecter** = 控制</li>
+</ul>
+<p>這讓 OpenBMC 在 host/device 管理模型上更自然，不用把一堆控制語意硬塞進 OEM 命令。</p>
+<h3>4.5 PDR（Platform Descriptor Records）為什麼重要</h3>
+<p>PDR 可以理解成：</p>
+<ul>
+<li>平台元件、sensor、effecter、entity 的描述資料</li>
+<li>讓 requester 知道有哪些東西可監控/控制</li>
+<li>在多裝置、自描述裝置情境中很重要</li>
+</ul>
+<p>你做 debug 時，若 PLDM 世界跟 D-Bus 世界對不上，PDR 常是關鍵切點。</p>
+<h3>4.6 在 OpenBMC 裡它出現在哪</h3>
+<p>PLDM 在 OpenBMC 常見角色：</p>
+<ul>
+<li>**BMC 當 requester**：去發 PLDM 命令給其他裝置</li>
+<li>**BMC 當 responder**：回應 host 或其他 requester 的 PLDM 命令</li>
+<li>`pldmd` / PLDM library 處理 encode/decode、message flow</li>
+<li>把 PLDM 的 FRU/sensor/inventory/control 映射到 D-Bus 物件</li>
+<li>`bmcweb` 再從 D-Bus 往上翻成 Redfish</li>
+</ul>
+<h3>4.7 實務 debug checklist</h3>
+<p>若 PLDM 相關功能有問題，優先檢查：</p>
+<p>1. MCTP transport 通不通  </p>
+<p>2. endpoint / EID / discovery 是否正常  </p>
+<p>3. requester/responder 角色有沒有搞反  </p>
+<p>4. type / command / completion code 是否合理  </p>
+<p>5. PDR / FRU record 內容是否正確  </p>
+<p>6. D-Bus 映射是否成功  </p>
+<p>7. Redfish 只是沒翻到，還是底層根本沒資料</p>
+<p>---</p>
+<h2>5. Yocto：OpenBMC 工作真正必要的部分</h2>
+<p>你不需要先變成 Yocto 專家；先把**能動手改 OpenBMC**需要的部分補齊。</p>
+<h3>5.1 必懂的 8 件事</h3>
+<p>#### 1) Layer 結構</p>
+<p>至少知道：</p>
+<ul>
+<li>`poky` / OE-Core 是基底</li>
+<li>OpenBMC 自己有 `meta-phosphor`、`meta-openbmc-machines` 等 layer</li>
+<li>vendor / board 會再疊 BSP layer、machine layer、product layer</li>
+</ul>
+<p>你做事情時，先問：</p>
+<p>**這個變更應該落在哪一層？**</p>
+<p>#### 2) Recipe / bbappend</p>
+<ul>
+<li>`.bb`：定義怎麼抓 source、怎麼 build、裝哪些檔案</li>
+<li>`.bbappend`：對既有 recipe 疊 patch/config/install</li>
+</ul>
+<p>OpenBMC 日常改動很多時候不是改 build system 本身，而是：</p>
+<ul>
+<li>patch 某 daemon</li>
+<li>改 packageconfig</li>
+<li>加 systemd unit</li>
+<li>調 image install</li>
+</ul>
+<p>#### 3) machine / distro / local.conf 的責任分界</p>
+<ul>
+<li>**machine**：板級/SoC/硬體差異</li>
+<li>**distro**：政策、套件、版本、整體預設</li>
+<li>**local.conf**：本地實驗，不應變成正式產品設定來源</li>
+</ul>
+<p>#### 4) BitBake 基本操作</p>
+<p>至少熟這幾個：</p>
+<ul>
+<li>`bitbake &lt;target&gt;`</li>
+<li>`bitbake -e &lt;target&gt;`：追變數來源</li>
+<li>`bitbake -c clean &lt;target&gt;` / `-c cleansstate`</li>
+<li>看 task log / workdir / temp log</li>
+</ul>
+<p>#### 5) devtool</p>
+<p>當你要快速 patch 某元件時很好用：</p>
+<ul>
+<li>拉 source 到 workspace</li>
+<li>修改</li>
+<li>build / test</li>
+<li>匯出 patch 回 recipe</li>
+</ul>
+<p>#### 6) sstate 與 DL_DIR</p>
+<p>CI 與本機效率最重要：</p>
+<ul>
+<li>**DL_DIR**：source 下載快取</li>
+<li>**sstate-cache**：task 輸出快取</li>
+</ul>
+<p>不懂這兩個，你會被 build 時間折磨。</p>
+<p>#### 7) image 組成</p>
+<p>要知道 image 怎麼把服務放進去：</p>
+<ul>
+<li>什麼 package 被 install</li>
+<li>哪些 systemd service 被 enable</li>
+<li>哪些 feature 被 distro / machine 打開</li>
+</ul>
+<p>#### 8) patch 流</p>
+<p>OpenBMC/Yocto 開發常見流程是：</p>
+<ul>
+<li>改 upstream source 或 fork source</li>
+<li>在 layer 用 patch / bbappend 套進來</li>
+<li>用 bitbake 驗證</li>
+</ul>
+<h3>5.2 不用先深鑽的東西</h3>
+<p>第一週先不用太沉迷：</p>
+<ul>
+<li>每個 class 細節</li>
+<li>SDK / extensible SDK 深層機制</li>
+<li>multiconfig 複雜玩法</li>
+<li>特殊 package backend 細節</li>
+<li>每個 task 的內部原理</li>
+</ul>
+<h3>5.3 OpenBMC 情境下最實用的 Yocto 心法</h3>
+<ul>
+<li>**先知道 recipe 在哪，再談修改**</li>
+<li>**先用 `bitbake -e` 查變數覆蓋來源**</li>
+<li>**先分清是 source 問題、recipe 問題、image 組包問題、systemd enable 問題**</li>
+<li>**沒有共享 sstate / DL_DIR 的 CI，幾乎一定慢到失去耐心**</li>
+</ul>
+<p>---</p>
+<h2>6. Jenkins / CI-CD：OpenBMC / Yocto 團隊真正需要的部分</h2>
+<h3>6.1 先抓大原則</h3>
+<p>對 OpenBMC/Yocto pipeline，核心不是花俏 deploy，而是：</p>
+<ul>
+<li>**可重現 build 環境**</li>
+<li>**快取策略**</li>
+<li>**大 build 的資源隔離**</li>
+<li>**artifact/映像/測試結果留存**</li>
+<li>**分支與 patch 驗證自動化**</li>
+</ul>
+<h3>6.2 必懂主題</h3>
+<p>#### 1) Jenkinsfile / Pipeline as Code</p>
+<p>這是基本盤：</p>
+<ul>
+<li>pipeline 應版本控管</li>
+<li>PR/branch 自動帶出一致流程</li>
+<li>build/test/release 行為可 review</li>
+</ul>
+<p>#### 2) Declarative Pipeline</p>
+<p>除非已有大量 Groovy 歷史包袱，通常先以 Declarative 為主，因為：</p>
+<ul>
+<li>容易看</li>
+<li>容易維護</li>
+<li>比較適合跨團隊</li>
+</ul>
+<p>#### 3) Shared Library</p>
+<p>對多產品線或多板子很重要。可以把共用流程抽出：</p>
+<ul>
+<li>checkout</li>
+<li>cache mount</li>
+<li>kas/bitbake build</li>
+<li>artifact upload</li>
+<li>test stage</li>
+<li>log/archive/prune 規則</li>
+</ul>
+<p>#### 4) Containerized build agent</p>
+<p>Yocto/OpenBMC build 相依多、主機污染重，建議：</p>
+<ul>
+<li>用固定 container image 當 agent</li>
+<li>工具鏈版本固定</li>
+<li>把 host 差異降到最低</li>
+</ul>
+<p>#### 5) Kubernetes dynamic agents（若團隊規模值得）</p>
+<p>如果 build 量大：</p>
+<ul>
+<li>Jenkins controller 不必自己扛所有 job</li>
+<li>可用 k8s plugin 動態拉起 agent pod</li>
+<li>每個 build 用完即丟</li>
+<li>搭配 PVC / network storage 留 cache</li>
+</ul>
+<p>#### 6) Yocto 快取策略</p>
+<p>這是最關鍵的實戰點：</p>
+<ul>
+<li>共用 `DL_DIR`</li>
+<li>共用 `SSTATE_DIR` 或 sstate mirror</li>
+<li>規劃 cache 清理策略</li>
+<li>分清「可共享」與「會污染 reproducibility」的項目</li>
+</ul>
+<p>#### 7) Artifact 管理</p>
+<p>至少要留：</p>
+<ul>
+<li>image / tarball / manifest</li>
+<li>build logs</li>
+<li>test logs</li>
+<li>SBOM/版本資訊（若產品流程需要）</li>
+<li>對應 git SHA / layer revision</li>
+</ul>
+<h3>6.3 一條夠用的 pipeline 心智模型</h3>
+<pre><code>
+checkout layers/source
+
+ -&gt; restore DL_DIR / sstate cache
+
+ -&gt; build container/pod startup
+
+ -&gt; kas/bitbake build target image
+
+ -&gt; unit/static checks (可選)
+
+ -&gt; boot/smoke test/QEMU or lab target (可選)
+
+ -&gt; archive image/logs/manifests
+
+ -&gt; publish result / notify / tag release (必要時)
+
+</code></pre>
+<h3>6.4 你要特別注意的坑</h3>
+<ul>
+<li>**沒有 cache**：每次 cold build，CI 成本爆炸</li>
+<li>**cache 沒治理**：舊 cache 汙染、磁碟爆滿、難重現</li>
+<li>**agent 不固定**：建置偶發失敗、環境飄移</li>
+<li>**artifact 不完整**：出問題無法追溯哪個 layer/commit 造成</li>
+<li>**共享 library 過度魔法化**：新人完全看不懂 pipeline 真正做什麼</li>
+</ul>
+<h3>6.5 Jenkins 在 OpenBMC 團隊的最低實用線</h3>
+<p>你不需要先會寫很炫的 Groovy；先能做到：</p>
+<ul>
+<li>看懂 Jenkinsfile</li>
+<li>看懂 agent / stage / sh / archive / post</li>
+<li>知道 cache 在哪</li>
+<li>知道 build target 怎麼定義</li>
+<li>知道失敗時去哪拿 bitbake log、artifact、console output</li>
+</ul>
+<p>---</p>
+<h2>7. 7 天衝刺計畫：目標是「快速能工作」</h2>
+<p>每天建議 2.5～4 小時。  </p>
+<p>主軸是：**先建立定位能力，再補 protocol 與 build/CI 手感。**</p>
+<h3>Day 1 — 建立全局圖</h3>
+<p>目標：知道 OpenBMC 各層在幹嘛，不迷路。</p>
+<p>做法：</p>
+<ul>
+<li>看 OpenBMC docs 的總覽與 interface overview</li>
+<li>看 `bmcweb` repo README / 目錄</li>
+<li>把「外部 API -&gt; bmcweb -&gt; D-Bus -&gt; backend services」畫成自己的圖</li>
+</ul>
+<p>產出：</p>
+<ul>
+<li>自己寫一頁架構筆記</li>
+<li>列出常見故障切點：API / D-Bus / daemon / transport</li>
+</ul>
+<h3>Day 2 — Redfish refresh（只補 delta，不重學基礎）</h3>
+<p>目標：把 5 年的差異補回來。</p>
+<p>做法：</p>
+<ul>
+<li>快看 DMTF Redfish release page 與近年 overview</li>
+<li>重點掃：Telemetry、EventService、CertificateService、UpdateService、Interop/Profile</li>
+<li>對照以前熟悉的 model，標出新增重點</li>
+</ul>
+<p>產出：</p>
+<ul>
+<li>一張「以前 vs 現在」delta 清單</li>
+<li>一張「OpenBMC 可能受影響的後端 mapping」清單</li>
+</ul>
+<h3>Day 3 — D-Bus / bmcweb 實戰視角</h3>
+<p>目標：學會從 Redfish 往 D-Bus 倒查。</p>
+<p>做法：</p>
+<ul>
+<li>看 OpenBMC D-Bus / inventory / sensor 相關設計文件</li>
+<li>看 `bmcweb` 內 Redfish route/mapping 的實際程式碼結構</li>
+<li>嘗試理解 1~2 個資源（例如 Systems、Sensors/Log）的資料路徑</li>
+</ul>
+<p>產出：</p>
+<ul>
+<li>一張「某 Redfish resource 對到哪些 D-Bus 物件/服務」的對照表</li>
+</ul>
+<h3>Day 4 — MCTP</h3>
+<p>目標：能跟做 host/device management 的人說同一種語言。</p>
+<p>做法：</p>
+<ul>
+<li>看 OpenBMC MCTP design doc</li>
+<li>補 DMTF MCTP Base / binding 的名詞</li>
+<li>理解 EID、bus owner、discovery、packet/message、routing</li>
+</ul>
+<p>產出：</p>
+<ul>
+<li>一頁 MCTP cheat sheet</li>
+<li>一張 transport 問題的 debug flow</li>
+</ul>
+<h3>Day 5 — PLDM</h3>
+<p>目標：知道 PLDM 如何進 OpenBMC 內部資料模型。</p>
+<p>做法：</p>
+<ul>
+<li>看 OpenBMC PLDM stack doc</li>
+<li>補 Base / FRU / Platform Monitoring and Control / FW Update 的觀念</li>
+<li>釐清 requester/responder 與 D-Bus 映射</li>
+</ul>
+<p>產出：</p>
+<ul>
+<li>一張「PLDM -&gt; D-Bus -&gt; Redfish」資料流圖</li>
+<li>一份常見 type/record/debug 問題清單</li>
+</ul>
+<h3>Day 6 — Yocto for OpenBMC</h3>
+<p>目標：不再怕 build system。</p>
+<p>做法：</p>
+<ul>
+<li>補 layer / recipe / bbappend / bitbake / devtool / sstate / DL_DIR</li>
+<li>看 OpenBMC 相關 meta layer 結構</li>
+<li>找 1 個實際 recipe，追到它如何進 image</li>
+</ul>
+<p>產出：</p>
+<ul>
+<li>一張 OpenBMC layer 地圖</li>
+<li>一張「我如果要改某 service，要改哪裡」操作路徑</li>
+</ul>
+<h3>Day 7 — Jenkins / CI-CD</h3>
+<p>目標：能看懂現有 pipeline，知道優先優化什麼。</p>
+<p>做法：</p>
+<ul>
+<li>看 Jenkins pipeline、shared library、k8s agent 官方文件</li>
+<li>用 OpenBMC/Yocto 視角盤點：cache、container agent、artifact、測試切分</li>
+<li>把你所在團隊或想像中的 pipeline 畫出來</li>
+</ul>
+<p>產出：</p>
+<ul>
+<li>一版最小可用 Jenkins pipeline 設計</li>
+<li>一份 CI 改善優先級（cache &gt; reproducibility &gt; artifacts &gt; test automation）</li>
+</ul>
+<p>---</p>
+<h2>8. 如果只能用半天，該先學什麼？</h2>
+<p>優先順序：</p>
+<p>1. **OpenBMC 架構圖：bmcweb / D-Bus / services / MCTP / PLDM**  </p>
+<p>2. **Redfish 新增重點：Telemetry / Events / Cert / Update / Interop**  </p>
+<p>3. **MCTP 與 PLDM 的角色分工**  </p>
+<p>4. **Yocto layer + recipe + sstate/DL_DIR**  </p>
+<p>5. **Jenkins pipeline + cache 基本盤**</p>
+<p>---</p>
+<h2>9. 開始實際工作前，建議先能回答這 12 題</h2>
+<p>1. OpenBMC 內部資料主要靠什麼 IPC？  </p>
+<p>2. `bmcweb` 在 OpenBMC 的角色是什麼？  </p>
+<p>3. Redfish resource 出錯時，第一站要查哪？  </p>
+<p>4. MCTP 解決的是 transport 還是 data model？  </p>
+<p>5. PLDM 解決的是 transport 還是 platform management message/model？  </p>
+<p>6. EID 是什麼？  </p>
+<p>7. bus owner 在做什麼？  </p>
+<p>8. PLDM requester 與 responder 差在哪？  </p>
+<p>9. PDR 為什麼重要？  </p>
+<p>10. Yocto 的 `.bb` 與 `.bbappend` 差在哪？  </p>
+<p>11. `DL_DIR` 與 `sstate-cache` 差在哪？  </p>
+<p>12. Yocto CI 最先該優化的是什麼？</p>
+<p>如果你能順手回答以上問題，這週衝刺就已經足以讓你開始接 OpenBMC 相關工作。</p>
+<p>---</p>
+<h2>10. 最後給有經驗工程師的直白建議</h2>
+<ul>
+<li>**不要把 OpenBMC 當成單一韌體專案，要當成一套可組裝的 Linux 管理平台。**</li>
+<li>**不要從 Redfish API 表面停住，真正的 debug 能力來自 D-Bus 與後端服務定位。**</li>
+<li>**不要把 MCTP/PLDM 看成冷門協定；它們是 OpenBMC 對內管理演進的主戰場之一。**</li>
+<li>**Yocto 不需要先學滿，只要先學會找到層、recipe、cache、build log。**</li>
+<li>**CI/CD 先做可重現與快取，再談華麗自動化。**</li>
+</ul>
+<p>這樣學，1 週內就能從「知道名詞」進到「能參與 debug / review / 設計討論」。</p></body></html>

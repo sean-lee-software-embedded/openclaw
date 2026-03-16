@@ -1,0 +1,490 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:920px;margin:0 auto;padding:28px 18px;line-height:1.7;background:#0b1220;color:#e6edf3}a{color:#7cc0ff}h1,h2,h3{color:#fff}pre{background:#111827;padding:14px;border-radius:12px;overflow:auto}code{font-family:ui-monospace,monospace}ul{padding-left:22px}p,li{color:#cbd5e1}</style></head><body><h1>OpenClaw 能力包（實戰版）</h1>
+<p>&gt; 給已經有工程背景、想把 OpenClaw 用得更順、更聰明的人。</p>
+<p>&gt; 核心觀念只有一句：**不是換更強模型就會變強，而是把「模型 + 工具 + 技能 + 執行環境」配對對了。**</p>
+<p>---</p>
+<h2>1. 先用一句話理解 OpenClaw</h2>
+<p>OpenClaw 不是單純聊天機器人，而是你自己設備上的 **AI 控制平面**：</p>
+<ul>
+<li>**Gateway**：中樞，負責 session、工具、通道、裝置、Web UI、cron、webhook</li>
+<li>**Model**：負責理解、推理、規劃、寫文字</li>
+<li>**Tools**：真正做事的手，例如 read/write/edit/exec/browser/nodes/cron/sessions</li>
+<li>**Skills**：把某一類工作流程封裝成可重用的 SOP</li>
+<li>**Runtime**：任務實際在哪裡跑、怎麼跑，例如主代理、subagent、ACP harness、裝置節點</li>
+</ul>
+<p>所以「讓助手更聰明」的正確做法通常不是只升級模型，而是：</p>
+<p>1. 給它正確上下文</p>
+<p>2. 給它正確工具</p>
+<p>3. 給它正確 skill</p>
+<p>4. 讓任務在正確 runtime 上執行</p>
+<p>5. 把常做工作變成穩定流程</p>
+<p>---</p>
+<h2>2. 現在的 OpenClaw，強在哪裡</h2>
+<p>從目前 README / changelog / skill 設計看，OpenClaw 的主流用法已經很明確：</p>
+<h3>A. 把聊天介面變成控制面板</h3>
+<p>不是只在 Telegram/Discord/Slack 回答問題，而是：</p>
+<ul>
+<li>收訊息後查 GitHub、跑 shell、讀寫檔案</li>
+<li>呼叫 browser / node / cron / webhook</li>
+<li>把結果回送到原聊天介面</li>
+</ul>
+<p>這種模式最適合你這種偏技術、偏 workflow 的使用者：**直接在對話裡下達操作級任務**。</p>
+<h3>B. 用 subagent 分流複雜工作</h3>
+<p>OpenClaw 的 `sessions_spawn` 可把任務丟給隔離的子代理執行，完成後再回報主對話。很適合：</p>
+<ul>
+<li>寫 code / refactor / PR review</li>
+<li>大量 issue triage</li>
+<li>長時間背景任務</li>
+<li>需要獨立上下文的工作</li>
+</ul>
+<h3>C. 用 skills 讓常見任務穩定化</h3>
+<p>技能本質上是「可重複的操作說明 + 工作慣例 + 安全邊界」。</p>
+<p>不是讓模型變聰明，而是讓它**少走歪路、少亂猜、少發明流程**。</p>
+<h3>D. 把遠端/多裝置接進來</h3>
+<p>OpenClaw 現在很適合做：</p>
+<ul>
+<li>本機 Mac 控制</li>
+<li>Linux gateway 常駐</li>
+<li>iOS / Android / macOS node 配對</li>
+<li>Tailscale / SSH tunnel 安全遠端接入</li>
+<li>Dashboard / WebChat / Control UI 操作</li>
+</ul>
+<h3>E. 把自動化做成「會持續運作的助手」</h3>
+<p>比起一次性問答，實務上更有價值的是：</p>
+<ul>
+<li>heartbeat 定時檢查</li>
+<li>cron 週期性任務</li>
+<li>webhook / PubSub 事件觸發</li>
+<li>GitHub issue / review 自動追蹤</li>
+</ul>
+<p>---</p>
+<h2>3. 模型、工具、技能、runtime：怎麼分工</h2>
+<p>這四個概念如果分不清，很容易誤判能力邊界。</p>
+<h3>Model = 大腦</h3>
+<p>負責：</p>
+<ul>
+<li>理解需求</li>
+<li>推理</li>
+<li>寫摘要 / 寫程式 / 規劃步驟</li>
+<li>根據觀察做決策</li>
+</ul>
+<p>但模型本身 **不會**：</p>
+<ul>
+<li>自己讀你的磁碟</li>
+<li>自己看 GitHub 私有 repo</li>
+<li>自己操作 tmux</li>
+<li>自己打開手機鏡頭</li>
+<li>自己背景常駐檢查</li>
+</ul>
+<h3>Tool = 手和眼</h3>
+<p>負責：</p>
+<ul>
+<li>`read/write/edit`：檔案</li>
+<li>`exec/process`：shell / 長任務 / 背景程序</li>
+<li>`browser`：瀏覽器操作</li>
+<li>`nodes`：裝置能力（相機、畫面、通知、定位、system.run）</li>
+<li>`cron`：排程</li>
+<li>`sessions_*`：子代理 / 歷史 / 發送</li>
+</ul>
+<p>**沒有工具，再強模型也只能猜。**</p>
+<h3>Skill = 工作 SOP / 戰術模板</h3>
+<p>負責：</p>
+<ul>
+<li>告訴代理「什麼情境該用什麼工具」</li>
+<li>規範安全邊界</li>
+<li>提供命令模式、排錯順序、輸出格式</li>
+<li>降低模型每次從零思考的成本</li>
+</ul>
+<p>你可以把 skill 想成：**帶有操作經驗的 playbook**。</p>
+<h3>Runtime = 執行位置與執行方式</h3>
+<p>常見實務上可這樣理解：</p>
+<ul>
+<li>**main agent**：你正在對話的主要代理</li>
+<li>**subagent runtime**：隔離上下文的小代理，做完回報</li>
+<li>**ACP runtime / harness**：把 Claude Code / Codex / Pi / OpenCode 這種外部 coding harness 綁進 OpenClaw 工作流</li>
+<li>**node runtime**：裝置本地執行，例如手機/電腦上的 device-local action</li>
+<li>**gateway host runtime**：shell/exec 通常跑在 gateway 所在主機</li>
+</ul>
+<p>一句話：</p>
+<ul>
+<li>**模型決定會不會想**</li>
+<li>**工具決定能不能做**</li>
+<li>**技能決定會不會做對**</li>
+<li>**runtime 決定在哪裡做、做得到多少**</li>
+</ul>
+<p>---</p>
+<h2>4. Agents / Subagents / ACP harnesses：實務理解</h2>
+<h2>4.1 Main agent</h2>
+<p>主代理就是平常跟你對話的那個。適合：</p>
+<ul>
+<li>快速問答</li>
+<li>協調任務</li>
+<li>小修改</li>
+<li>查資料</li>
+<li>決策和彙整</li>
+</ul>
+<p>不適合把所有複雜工作都塞進來，因為上下文會變髒。</p>
+<h2>4.2 Subagent</h2>
+<p>subagent 適合做「可獨立完成」的任務：</p>
+<ul>
+<li>寫一個功能</li>
+<li>掃 repo 找問題</li>
+<li>做一輪 issue triage</li>
+<li>長時間跑背景檢查</li>
+</ul>
+<p>OpenClaw 的 `sessions_spawn` 會：</p>
+<ul>
+<li>開新 session</li>
+<li>給子代理隔離上下文</li>
+<li>執行完後自動 announce 給主對話</li>
+<li>預設不讓子代理再一直往下 spawn</li>
+</ul>
+<p>**實戰觀念：subagent 是工作執行者，不是聊天角色。**</p>
+<h2>4.3 ACP harness</h2>
+<p>ACP runtime 比較像「把外部 coding agent / harness 接入 OpenClaw 的長工作通道」。</p>
+<p>實務上適合：</p>
+<ul>
+<li>在 Telegram / Discord thread/topic 綁定一個 coding harness</li>
+<li>持續對同一個外部代理下指令</li>
+<li>保留 thread-like 工作流</li>
+<li>把 Claude Code / Codex / Pi 這類工具當作可持續互動的工作會話</li>
+</ul>
+<p>如果你只是要一次性請子代理處理任務，subagent 就夠。</p>
+<p>如果你要的是 **持續操控外部 coding harness**，才要想 ACP。</p>
+<h3>粗分原則</h3>
+<ul>
+<li>**一般複雜任務** → subagent</li>
+<li>**長時間 coding flow / thread-bound harness** → ACP runtime</li>
+<li>**只是本地 shell 一次性操作** → exec</li>
+</ul>
+<p>---</p>
+<h2>5. Skills 是什麼，為什麼真的有用</h2>
+<p>Skill 不是插件商店式的裝飾品，而是把常見任務從「看運氣」變成「有流程」。</p>
+<p>它的價值在於：</p>
+<ul>
+<li>減少模型瞎猜 CLI / flags</li>
+<li>把高風險操作前置成檢查清單</li>
+<li>讓排錯順序更穩定</li>
+<li>讓相同需求每次都走同一套路</li>
+</ul>
+<p>對技術使用者來說，skill 的真正價值不是 convenience，而是 **降低操作隨機性**。</p>
+<p>---</p>
+<h2>6. 你最值得先用好的高價值 skills</h2>
+<p>以下是對你最有價值的一批。</p>
+<h3>6.1 coding-agent</h3>
+<p>**用途**：把寫程式、重構、PR review、長任務交給 Codex / Claude Code / Pi / OpenCode。</p>
+<p>**何時最好用**：</p>
+<ul>
+<li>新功能開發</li>
+<li>中大型重構</li>
+<li>需要探索大量檔案</li>
+<li>PR review 要在乾淨上下文裡做</li>
+</ul>
+<p>**實務重點**：</p>
+<ul>
+<li>Codex / Pi / OpenCode 通常需要 PTY</li>
+<li>Claude Code 建議 `--print --permission-mode bypassPermissions`</li>
+<li>長任務要配 `background:true`</li>
+<li>要把 `workdir` 設準，避免代理亂逛</li>
+</ul>
+<p>**對你特別有用的場景**：</p>
+<ul>
+<li>讓主代理做 PM / reviewer</li>
+<li>讓 coding-agent 當 implementation worker</li>
+<li>用 process/tmux 監控長任務</li>
+</ul>
+<h3>6.2 github</h3>
+<p>**用途**：GitHub issue / PR / CI / run log / API 查詢。</p>
+<p>**適合**：</p>
+<ul>
+<li>查 PR 狀態</li>
+<li>看 CI fail 在哪裡</li>
+<li>建 issue / 留 comment / merge PR</li>
+<li>快速拉 repo metadata</li>
+</ul>
+<p>**為什麼重要**：</p>
+<p>這個 skill 讓 OpenClaw 從「會寫 code」升級成「會跟工程流程互動」。</p>
+<h3>6.3 gh-issues</h3>
+<p>**用途**：批量抓 GitHub issues，spawn subagents 修復，開 PR，甚至追 review comments。</p>
+<p>這個 skill 非常像 **issue orchestrator**。</p>
+<p>**高價值場景**：</p>
+<ul>
+<li>針對 bug label 批量處理</li>
+<li>watch 模式持續監控新 issue / review</li>
+<li>cron-safe 模式做定時掃描</li>
+<li>把 repo maintenance 自動化</li>
+</ul>
+<p>**如果你常帶團隊或維護 repo，這個 skill 很值。**</p>
+<h3>6.4 healthcheck</h3>
+<p>**用途**：檢查 OpenClaw 主機安全狀態、OpenClaw 安全審核、版本狀態、風險姿態。</p>
+<p>**它很重要，因為很多人會誤以為 OpenClaw 幫你處理了主機安全。其實沒有。**</p>
+<p>它會區分：</p>
+<ul>
+<li>OpenClaw 自身安全設定</li>
+<li>OS / firewall / SSH / 更新策略</li>
+<li>遠端暴露方式</li>
+<li>風險容忍度</li>
+</ul>
+<p>**適合做基線檢查 + 定期 cron audit。**</p>
+<h3>6.5 node-connect</h3>
+<p>**用途**：排 iOS / Android / macOS node 配對與路由問題。</p>
+<p>你只要開始玩：</p>
+<ul>
+<li>Android node</li>
+<li>iOS node</li>
+<li>macOS node mode</li>
+<li>Tailscale / remote gateway</li>
+</ul>
+<p>這個 skill 就幾乎是必備。</p>
+<p>它的價值不只是排錯，而是強迫你先釐清 topology：</p>
+<ul>
+<li>同機</li>
+<li>同 LAN</li>
+<li>同 tailnet</li>
+<li>公網 / reverse proxy</li>
+</ul>
+<p>這種思路很工程，能少走很多冤枉路。</p>
+<h3>6.6 tmux</h3>
+<p>**用途**：遠端控制 tmux session、送按鍵、抓 pane output。</p>
+<p>如果你把 Claude Code / Codex / 互動式 CLI 長期跑在 tmux，這 skill 很實用。</p>
+<p>**典型場景**：</p>
+<ul>
+<li>監控長時間編碼工作</li>
+<li>回答互動式 prompt</li>
+<li>抓取 session 狀態</li>
+<li>遠端接手 TUI 任務</li>
+</ul>
+<h3>6.7 session-logs</h3>
+<p>**用途**：查自己過去 session JSONL 歷史。</p>
+<p>這個 skill 很像「可稽核記憶層」。</p>
+<p>適合：</p>
+<ul>
+<li>找之前到底講過什麼</li>
+<li>尋找決策脈絡</li>
+<li>做回顧 / 成本分析 / tool usage 分析</li>
+</ul>
+<p>對長期使用者來說，這比單純記憶更可靠，因為它是可查詢的歷史資料。</p>
+<h3>6.8 weather</h3>
+<p>**用途**：簡單天氣查詢。</p>
+<p>不是核心 skill，但很適合放在 heartbeat 裡做低成本實用檢查。</p>
+<p>---</p>
+<h2>7. 如何真的讓 OpenClaw 更有效</h2>
+<h2>7.1 Prompt 要像委派，不要像閒聊</h2>
+<p>最有效的 prompt 通常包含這 5 件事：</p>
+<p>1. **目標**：你要產出什麼</p>
+<p>2. **範圍**：哪些檔案 / repo / 系統</p>
+<p>3. **限制**：不要做什麼、不要動什麼</p>
+<p>4. **驗收**：怎樣算完成</p>
+<p>5. **回報格式**：你要它怎麼報告</p>
+<h3>好例子</h3>
+<ul>
+<li>「幫我檢查這個 repo 最近 5 個 failed CI，按 root cause 分類，先不要改 code，只給我修復優先順序。」</li>
+<li>「在 `firmware/` 內找造成 boot timeout 的路徑，先做分析與最小修補提案，不要直接改 10 個檔案。」</li>
+<li>「幫我用 subagent 做 PR review，列 blocker / nits / 風險，不要重複作者已知事項。」</li>
+</ul>
+<h3>差例子</h3>
+<ul>
+<li>「幫我看一下」</li>
+<li>「你覺得怎麼辦」</li>
+<li>「讓它更好」</li>
+</ul>
+<p>對強模型也是一樣：**模糊需求只會得到模糊行為。**</p>
+<h2>7.2 把 workspace 文件當成能力放大器</h2>
+<p>你現在這套 OpenClaw 本身就有這個思路：</p>
+<ul>
+<li>`AGENTS.md`：規則、工作方式、紅線</li>
+<li>`SOUL.md`：語氣與人格</li>
+<li>`USER.md`：你的背景與偏好</li>
+<li>`TOOLS.md`：環境特定資訊</li>
+<li>`MEMORY.md` / `memory/*.md`：長短期記憶</li>
+<li>`HEARTBEAT.md`：週期巡檢 SOP</li>
+</ul>
+<h3>真正有幫助的寫法</h3>
+<p>**AGENTS.md**：</p>
+<ul>
+<li>哪些操作可直接做</li>
+<li>哪些一定先問</li>
+<li>commit / branch / PR 習慣</li>
+<li>你討厭什麼回覆風格</li>
+</ul>
+<p>**TOOLS.md**：</p>
+<ul>
+<li>SSH host alias</li>
+<li>常用 server / camera / device 名稱</li>
+<li>特定 repo 位置</li>
+<li>常用 CLI 慣例</li>
+</ul>
+<p>**USER.md**：</p>
+<ul>
+<li>你的決策風格</li>
+<li>你偏好的輸出格式</li>
+<li>你最常做哪幾種任務</li>
+</ul>
+<p>這些文件的作用不是「讓回答更人味」，而是**減少代理每次重新建立工作模型的成本**。</p>
+<h2>7.3 Memory 要有層次，不要把所有事都塞長記憶</h2>
+<p>實務上建議：</p>
+<ul>
+<li>`memory/YYYY-MM-DD.md`：原始事件、暫時線索、當天進展</li>
+<li>`MEMORY.md`：長期有價值的偏好、決策、慣例、重要背景</li>
+</ul>
+<h3>什麼該進 MEMORY.md</h3>
+<ul>
+<li>長期偏好</li>
+<li>固定工作習慣</li>
+<li>常見專案脈絡</li>
+<li>值得永久保留的教訓</li>
+</ul>
+<h3>什麼不該進 MEMORY.md</h3>
+<ul>
+<li>一次性的 task 狀態</li>
+<li>臨時 debug 細節</li>
+<li>每天都會變的雜訊</li>
+</ul>
+<p>**好的記憶系統不是越多越好，而是越容易在正確時候被用到越好。**</p>
+<h2>7.4 Heartbeat：讓助手主動，但不要煩</h2>
+<p>Heartbeat 適合：</p>
+<ul>
+<li>批次檢查 email / calendar / weather / GitHub / CI</li>
+<li>做輕量巡檢</li>
+<li>整理 memory</li>
+<li>回報重要變化</li>
+</ul>
+<h3>你可以把 HEARTBEAT.md 寫成這種風格</h3>
+<ul>
+<li>每日 2–4 次輪詢：GitHub 通知、重要 CI、日程、天氣</li>
+<li>超過 8 小時沒主動提醒且有新事件才回報</li>
+<li>深夜除非 urgent 不主動打擾</li>
+<li>每次順便更新 `memory/heartbeat-state.json`</li>
+</ul>
+<p>Heartbeat 的價值在於：**把多個低頻任務合併成一個低干擾巡檢節奏。**</p>
+<h2>7.5 Cron：給精準時間、獨立任務</h2>
+<p>Cron 適合：</p>
+<ul>
+<li>每天固定時間跑安全 audit</li>
+<li>每小時檢查特定 repo issue / review</li>
+<li>早上固定整理 dashboard / 狀態</li>
+<li>一次性 reminder</li>
+</ul>
+<p>如果 heartbeat 是巡邏員，cron 就是排班系統。</p>
+<h3>一個好原則</h3>
+<ul>
+<li>**需要精準時間** → cron</li>
+<li>**需要批次巡檢與情境感知** → heartbeat</li>
+</ul>
+<h2>7.6 Dashboard / Control UI / WebChat：別只靠 Telegram</h2>
+<p>現在 OpenClaw 本身就有 Gateway Control UI 與 WebChat。這些對技術用戶的價值很實際：</p>
+<ul>
+<li>看 session 狀態</li>
+<li>看工具結果</li>
+<li>做配置與觀察</li>
+<li>避免重度工具輸出全擠在聊天介面</li>
+</ul>
+<p>如果你開始把 OpenClaw 用成控制平面，**Web UI 幾乎是必要，不是可有可無。**</p>
+<h2>7.7 GitHub Pages / 公開 artifacts：把輸出變可分享成果</h2>
+<p>很適合把 OpenClaw 產物做成：</p>
+<ul>
+<li>分析報告 HTML</li>
+<li>測試報告靜態頁</li>
+<li>圖表 / 指標頁面</li>
+<li>每日 / 每週摘要頁</li>
+</ul>
+<p>常見做法：</p>
+<ul>
+<li>讓代理生成 markdown / html / json artifacts</li>
+<li>commit 到 repo</li>
+<li>用 GitHub Pages 或其他靜態站點公開</li>
+</ul>
+<p>這樣聊天不只是結論，而是通往可瀏覽成果的入口。</p>
+<h2>7.8 安全遠端接入：優先 tailnet / SSH tunnel，不要急著公網暴露</h2>
+<p>從目前 README 的建議看，安全路徑很清楚：</p>
+<h3>優先順序</h3>
+<p>1. **Tailscale Serve**：尾網內 HTTPS，最適合私人遠端使用</p>
+<p>2. **SSH tunnel**：簡單、可控</p>
+<p>3. **Tailscale Funnel / public URL**：有明確需求再開</p>
+<h3>原則</h3>
+<ul>
+<li>`gateway.bind` 盡量維持 loopback</li>
+<li>真要遠端，優先 tailnet，不要直接裸露服務</li>
+<li>公開入口要有 password/token auth</li>
+<li>先做 `openclaw security audit --deep`</li>
+</ul>
+<p>對你這種技術使用者，我會很直接：</p>
+<p>**先把遠端 access path 想清楚，再談功能擴充。**</p>
+<p>---</p>
+<h2>8. 哪些事情不是換更強模型就能補的</h2>
+<p>這一段很重要。</p>
+<h3>8.1 沒有工具權限，就做不了</h3>
+<p>例如：</p>
+<ul>
+<li>想看 repo 實際內容 → 要 `read` / `git` / `gh`</li>
+<li>想改檔案 → 要 `write` / `edit`</li>
+<li>想跑測試 → 要 `exec`</li>
+<li>想查 CI run → 要 `gh` 或 API</li>
+<li>想控制手機/電腦 → 要 `node` 配對與授權</li>
+</ul>
+<h3>8.2 沒有正確 runtime，就做不對地方</h3>
+<p>例如：</p>
+<ul>
+<li>想在手機上執行裝置動作，不是靠主機模型，而是靠 node runtime</li>
+<li>想持續操作 Codex/Claude Code thread，不是單純 subagent，而是 ACP/harness flow</li>
+<li>想跑背景長任務，不是同一個聊天回合硬撐，而是 background + process / subagent</li>
+</ul>
+<h3>8.3 沒有 skill，模型常會「差一點」</h3>
+<p>它可能知道大方向，但：</p>
+<ul>
+<li>CLI flag 亂猜</li>
+<li>排錯順序不穩</li>
+<li>少做前置檢查</li>
+<li>漏掉安全邊界</li>
+</ul>
+<h3>8.4 沒有文件與記憶，模型每次都像剛上工</h3>
+<p>你如果沒有把：</p>
+<ul>
+<li>repo 慣例</li>
+<li>遠端主機資訊</li>
+<li>你偏好的工作方式</li>
+<li>過去決策</li>
+</ul>
+<p>寫進 workspace，模型再強也會反覆重新猜。</p>
+<p>---</p>
+<h2>9. 給你的實戰建議：最值得先完成的升級順序</h2>
+<h2>第 1 階段：把基本面做對</h2>
+<p>1. 補強 `AGENTS.md` / `TOOLS.md` / `USER.md`</p>
+<p>2. 建立 `HEARTBEAT.md`</p>
+<p>3. 確認 `MEMORY.md` 與 daily memory 使用規則</p>
+<p>4. 熟悉 Control UI / WebChat</p>
+<h2>第 2 階段：把工程流接進來</h2>
+<p>1. 設好 `github`</p>
+<p>2. 開始用 `coding-agent`</p>
+<p>3. 把 PR review / issue triage 交給 subagent</p>
+<p>4. 有需求再上 `gh-issues`</p>
+<h2>第 3 階段：把多裝置 / 遠端做穩</h2>
+<p>1. 決定 gateway 在哪台機器</p>
+<p>2. 決定 remote access path（優先 Tailscale / SSH）</p>
+<p>3. 需要時配 iOS / Android / macOS node</p>
+<p>4. 用 `node-connect` 建立排錯基線</p>
+<h2>第 4 階段：把它變成會持續工作的系統</h2>
+<p>1. 用 heartbeat 做巡檢</p>
+<p>2. 用 cron 做固定任務</p>
+<p>3. 用 artifacts / GitHub Pages 發佈結果</p>
+<p>4. 用 `healthcheck` 做定期安全檢查</p>
+<p>---</p>
+<h2>10. 一套很務實的使用心法</h2>
+<h3>問自己 4 個問題</h3>
+<p>1. **這件事主要是思考，還是操作？**</p>
+<p>2. **如果要操作，需要哪些工具？**</p>
+<p>3. **這是一次性任務，還是要長期維持上下文？**</p>
+<p>4. **它應該在哪裡執行：主機、子代理、ACP harness、還是裝置 node？**</p>
+<p>只要這四題答對，OpenClaw 大多就會好用很多。</p>
+<p>---</p>
+<h2>11. 最後的結論</h2>
+<p>OpenClaw 的上限，不是單看模型，而是你是否把它組成一個完整系統：</p>
+<ul>
+<li>**模型**負責判斷與生成</li>
+<li>**工具**負責取得真實世界能力</li>
+<li>**skill**負責把任務做穩</li>
+<li>**runtime**負責在對的地方執行</li>
+<li>**workspace docs + memory** 負責長期一致性</li>
+<li>**heartbeat/cron/UI/remote access** 負責從一次性聊天進化成持續運作的助手</li>
+</ul>
+<p>對你這種工程背景使用者，最值得追求的不是「更像聊天機器人」，而是：</p>
+<p>&gt; **把 OpenClaw 調成一個可觀測、可委派、可追蹤、可擴充的個人 AI 作業系統。**</p></body></html>

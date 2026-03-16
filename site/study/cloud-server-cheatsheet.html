@@ -1,0 +1,180 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:920px;margin:0 auto;padding:28px 18px;line-height:1.7;background:#0b1220;color:#e6edf3}a{color:#7cc0ff}h1,h2,h3{color:#fff}pre{background:#111827;padding:14px;border-radius:12px;overflow:auto}code{font-family:ui-monospace,monospace}ul{padding-left:22px}p,li{color:#cbd5e1}</style></head><body><h1>AI / 雲端伺服器術語作弊單</h1>
+<h2>30 秒總結</h2>
+<ul>
+<li>**Hopper / Blackwell / Rubin**：NVIDIA 三個連續世代</li>
+<li>**H100 / H200 / B200 / GB200 / GB300**：晶片 / superchip 產品名</li>
+<li>**HGX / DGX / MGX / NVL72**：平台 / 系統 / 架構名</li>
+<li>**NVLink / NVSwitch**：櫃內多 GPU 高速互連</li>
+<li>**InfiniBand / Spectrum-X Ethernet**：櫃外叢集網路</li>
+<li>**HBM3e / CoWoS**：AI 晶片性能與出貨能力的兩個關鍵上游詞</li>
+<li>**液冷 / rack-scale / cost per token**：現在 AI server 討論最常見的三大現場詞</li>
+</ul>
+<p>---</p>
+<h2>一、名詞速配</h2>
+<h3>世代</h3>
+<ul>
+<li>**Hopper**：上一代主力</li>
+<li>**Blackwell**：目前主戰場</li>
+<li>**Rubin**：下一代，強調 reasoning / rack-scale / AI factory</li>
+</ul>
+<h3>GPU / Superchip</h3>
+<ul>
+<li>**H100**：Hopper 主力 GPU</li>
+<li>**H200**：Hopper + HBM3e 大記憶體版</li>
+<li>**B200**：Blackwell GPU</li>
+<li>**GB200**：Grace CPU + 2x Blackwell GPU 的 superchip</li>
+<li>**GB300**：Blackwell Ultra 強化版</li>
+</ul>
+<h3>平台 / 系統</h3>
+<ul>
+<li>**HGX**：多 GPU 高階平台底座</li>
+<li>**DGX**：NVIDIA 自家完整 AI 系統 / 平台</li>
+<li>**MGX**：給 OEM / ODM 的模組化參考架構</li>
+<li>**NVL72**：72 GPU 的 rack-scale NVLink domain</li>
+</ul>
+<p>---</p>
+<h2>二、一句話定義</h2>
+<h3>H100</h3>
+<p>Hopper 時代的代表作，讓大型 AI 訓練與推論真正成為資料中心主流。</p>
+<h3>H200</h3>
+<p>H100 的記憶體強化版，最大賣點是 **HBM3e、容量更大、頻寬更高**。</p>
+<h3>B200</h3>
+<p>Blackwell 家族核心 GPU，是新一代 AI factory 的主要算力元件。</p>
+<h3>GB200</h3>
+<p>不是單純 GPU 卡，而是 **Grace CPU + Blackwell GPU 的緊耦合運算模組**。</p>
+<h3>GB300</h3>
+<p>Blackwell Ultra 路線，通常代表更高推論效能與更大記憶體資源。</p>
+<h3>HGX</h3>
+<p>NVIDIA 高階多 GPU 平台底座，很多 OEM / ODM 整機都建立在 HGX 上。</p>
+<h3>DGX</h3>
+<p>NVIDIA 自己包好的整體 AI 解決方案，重點是硬體 + 軟體 + 支援服務。</p>
+<h3>MGX</h3>
+<p>NVIDIA 的模組化 server 參考架構，讓夥伴更快做出不同型號。</p>
+<h3>NVL72</h3>
+<p>72 顆 GPU 的整櫃系統形態，是 rack-scale AI system 的代表詞。</p>
+<p>---</p>
+<h2>三、網路 / 互連別再混</h2>
+<h3>NVLink</h3>
+<p>GPU 與 GPU 之間的高速互連，偏 **scale-up**。</p>
+<h3>NVSwitch</h3>
+<p>讓多顆 GPU 可以高頻寬、低延遲、近似全互連地交換資料。</p>
+<h3>InfiniBand</h3>
+<p>大型 HPC / AI 訓練叢集常用高效能網路，偏極致性能。</p>
+<h3>Spectrum-X</h3>
+<p>NVIDIA 主打的 **AI Ethernet 平台**，目標是讓 Ethernet 也能更適合 AI cloud。</p>
+<h3>ConnectX</h3>
+<p>高效能 NIC / SuperNIC 家族，負責把節點高速接上網路。</p>
+<h3>BlueField</h3>
+<p>DPU。負責網路 / 安全 / storage / infrastructure offload，不是主算力 GPU。</p>
+<p>---</p>
+<h2>四、你開會最需要懂的差異</h2>
+<h3>NVLink / NVSwitch vs InfiniBand / Ethernet</h3>
+<ul>
+<li>**NVLink / NVSwitch**：櫃內、節點內，多 GPU 串成大系統</li>
+<li>**InfiniBand / Ethernet**：櫃外、跨節點，把多櫃串成大叢集</li>
+</ul>
+<h3>HGX vs DGX vs MGX</h3>
+<ul>
+<li>**HGX**：平台底座</li>
+<li>**DGX**：NVIDIA 完整成品 / 解法</li>
+<li>**MGX**：模組化參考設計</li>
+</ul>
+<h3>B200 vs GB200</h3>
+<ul>
+<li>**B200**：GPU</li>
+<li>**GB200**：CPU + GPU superchip / building block</li>
+</ul>
+<p>---</p>
+<h2>五、供應鏈與商業角色</h2>
+<h3>NVIDIA</h3>
+<p>定義 GPU、CPU、互連、reference architecture、軟體堆疊與整體平台語言。</p>
+<h3>ODM（例：Compal）</h3>
+<p>把平台做成可量產、可部署、可維修的實際系統；很強調設計整合、NPI、成本、液冷與機構量產能力。</p>
+<h3>OEM（例：Dell）</h3>
+<p>把系統包成品牌化、企業可採購的完整方案，重點是售前售後、認證、服務、support、整合導入。</p>
+<h3>CSP</h3>
+<p>雲服務商 / hyperscaler。是超大買家，也是需求定義者，特別關心 cost per token、功耗、部署速度、多租戶與網路效率。</p>
+<p>---</p>
+<h2>六、上游關鍵詞</h2>
+<h3>HBM3e</h3>
+<p>新一代高頻寬記憶體。對 AI GPU 很關鍵，因為大模型很吃記憶體頻寬與容量。</p>
+<h3>CoWoS</h3>
+<p>先進封裝技術。AI GPU + HBM 的量產瓶頸常會跟它有關。</p>
+<p>---</p>
+<h2>七、為什麼現在一直在講液冷與 rack-scale？</h2>
+<p>因為 AI 櫃功率密度越來越高，風冷越來越難撐。</p>
+<h3>你要抓的關鍵字</h3>
+<ul>
+<li>liquid cooling</li>
+<li>cold plate</li>
+<li>CDU</li>
+<li>manifold</li>
+<li>quick disconnect</li>
+<li>rack power</li>
+<li>serviceability</li>
+</ul>
+<h3>白話翻譯</h3>
+<p>供應商不是只在賣一台伺服器，而是在賣「整櫃能長期運作的 AI 基礎設施」。</p>
+<p>---</p>
+<h2>八、最近新聞最常用的 10 個詞</h2>
+<p>1. AI factory</p>
+<p>2. rack-scale</p>
+<p>3. NVL72</p>
+<p>4. cost per token</p>
+<p>5. liquid-cooled rack</p>
+<p>6. HBM3e</p>
+<p>7. CoWoS</p>
+<p>8. Spectrum-X</p>
+<p>9. BlueField</p>
+<p>10. reasoning / agentic AI</p>
+<p>---</p>
+<h2>九、實戰翻譯：聽到這句時代表什麼？</h2>
+<h3>「我們支援 GB200 NVL72」</h3>
+<p>代表你不只做 server node，而是有能力碰整櫃級 AI 系統。</p>
+<h3>「我們導入 MGX 以縮短上市時間」</h3>
+<p>代表你在用 NVIDIA 模組化參考架構加快開發與跨代轉換。</p>
+<h3>「我們聚焦 AI factory」</h3>
+<p>代表你想賣的不只是硬體，而是整體基礎設施與運營敘事。</p>
+<h3>「我們提供 Spectrum-X Ethernet 解決方案」</h3>
+<p>代表你想切進 CSP / AI cloud 的 Ethernet 路線。</p>
+<h3>「我們強調 cost per token」</h3>
+<p>代表討論焦點已從訓練峰值性能，轉向商業化推論效率。</p>
+<p>---</p>
+<h2>十、最小必背清單</h2>
+<p>如果只背 12 個詞，背這些：</p>
+<ul>
+<li>Hopper</li>
+<li>Blackwell</li>
+<li>Rubin</li>
+<li>H100</li>
+<li>H200</li>
+<li>B200</li>
+<li>GB200</li>
+<li>HGX</li>
+<li>DGX</li>
+<li>MGX</li>
+<li>NVLink</li>
+<li>Spectrum-X</li>
+</ul>
+<p>如果再加 5 個：</p>
+<ul>
+<li>NVSwitch</li>
+<li>NVL72</li>
+<li>BlueField</li>
+<li>HBM3e</li>
+<li>CoWoS</li>
+</ul>
+<p>---</p>
+<h2>十一、真正該記住的一句話</h2>
+<p>&gt; 現在 AI / 雲端伺服器的主戰場，已從單機規格，轉向整櫃系統、網路互連、液冷供電、以及可量產供應鏈能力。</p>
+<p>---</p>
+<h2>參考來源</h2>
+<ul>
+<li>NVIDIA GB200 NVL72</li>
+<li>NVIDIA Blackwell Architecture</li>
+<li>NVIDIA H100 / H200</li>
+<li>NVIDIA HGX / DGX / MGX</li>
+<li>NVIDIA Spectrum-X</li>
+<li>NVIDIA Rubin platform</li>
+<li>NVIDIA NVLink / NVSwitch 技術文章</li>
+</ul></body></html>

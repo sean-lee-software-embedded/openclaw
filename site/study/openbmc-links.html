@@ -1,0 +1,224 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:920px;margin:0 auto;padding:28px 18px;line-height:1.7;background:#0b1220;color:#e6edf3}a{color:#7cc0ff}h1,h2,h3{color:#fff}pre{background:#111827;padding:14px;border-radius:12px;overflow:auto}code{font-family:ui-monospace,monospace}ul{padding-left:22px}p,li{color:#cbd5e1}</style></head><body><h1>OpenBMC 高價值官方連結清單</h1>
+<p>只放**高價值、官方、足夠支撐 1 週衝刺**的連結。  </p>
+<p>用途不是蒐藏，而是讓你快速建立正確地圖。</p>
+<p>---</p>
+<h2>1. OpenBMC 官方總覽</h2>
+<h3>OpenBMC docs repo / 文件入口</h3>
+<ul>
+<li>https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/README.md</li>
+<li>用途：先知道 OpenBMC 文件有哪些主題、常見開發與使用文件在哪</li>
+</ul>
+<h3>OpenBMC interface overview</h3>
+<ul>
+<li>https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/architecture/interface-overview.md</li>
+<li>用途：快速理解 OpenBMC 對外/對內介面、network services、host-BMC 連線脈絡</li>
+</ul>
+<h3>OpenBMC docs GitHub mirror</h3>
+<ul>
+<li>https://github.com/openbmc/docs</li>
+<li>用途：比較容易瀏覽與搜尋整體文件樹</li>
+</ul>
+<p>---</p>
+<h2>2. bmcweb / Redfish in OpenBMC</h2>
+<h3>bmcweb repo</h3>
+<ul>
+<li>https://github.com/openbmc/bmcweb</li>
+<li>用途：OpenBMC 的 web server / Redfish 實作主體；看 route、schema mapping、auth、event 行為</li>
+</ul>
+<h3>OpenBMC Redfish cheatsheet</h3>
+<ul>
+<li>https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/REDFISH-cheatsheet.md</li>
+<li>用途：快速喚回常用操作感覺</li>
+</ul>
+<h3>OpenBMC REST API intro</h3>
+<ul>
+<li>https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/rest-api.md</li>
+<li>用途：理解非 Redfish 的 OpenBMC REST 介面背景</li>
+</ul>
+<p>---</p>
+<h2>3. D-Bus / inventory / sensor 觀念</h2>
+<h3>D-Bus inventory architecture</h3>
+<ul>
+<li>https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/architecture/dbus-inventory.md</li>
+<li>用途：理解 inventory 如何在 D-Bus 表達與關聯</li>
+</ul>
+<h3>Sensor architecture</h3>
+<ul>
+<li>https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/architecture/sensor-architecture.md</li>
+<li>用途：看 sensor 在 OpenBMC 內部是如何建模與發布</li>
+</ul>
+<h3>ObjectMapper / D-Bus interfaces repo</h3>
+<ul>
+<li>https://github.com/openbmc/phosphor-dbus-interfaces</li>
+<li>用途：找 interface 定義；做 D-Bus &lt;-&gt; service 映射時很好用</li>
+</ul>
+<p>---</p>
+<h2>4. MCTP / PLDM（OpenBMC 角度）</h2>
+<h3>OpenBMC MCTP design</h3>
+<ul>
+<li>https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/designs/mctp/mctp.md</li>
+<li>用途：理解 OpenBMC 為何導入 MCTP、transport 與 messaging 分離、userspace vs kernel 方向</li>
+</ul>
+<h3>OpenBMC in-kernel MCTP design</h3>
+<ul>
+<li>https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/designs/mctp/mctp-kernel.md</li>
+<li>用途：看新設計偏好的 kernel/socket 方向</li>
+</ul>
+<h3>OpenBMC PLDM stack design</h3>
+<ul>
+<li>https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/designs/pldm-stack.md</li>
+<li>用途：理解 requester/responder、PLDM 與 D-Bus 的映射、設計目標</li>
+</ul>
+<h3>libmctp repo</h3>
+<ul>
+<li>https://github.com/openbmc/libmctp</li>
+<li>用途：補 userspace MCTP stack 觀念與實作線索</li>
+</ul>
+<h3>OpenBMC PLDM repo</h3>
+<ul>
+<li>https://github.com/openbmc/pldm</li>
+<li>用途：看實際 PLDM daemon / library / 相關實作</li>
+</ul>
+<p>---</p>
+<h2>5. DMTF 官方規格（只列最該看的）</h2>
+<h3>DMTF PMCI standards hub</h3>
+<ul>
+<li>https://www.dmtf.org/standards/pmci</li>
+<li>用途：MCTP / PLDM / SPDM 等 platform management communications 規格總入口</li>
+</ul>
+<h3>DMTF Redfish standards hub</h3>
+<ul>
+<li>https://www.dmtf.org/standards/redfish</li>
+<li>用途：Redfish release、spec、schema、white paper、overview 總入口</li>
+</ul>
+<h3>Redfish Developer Hub</h3>
+<ul>
+<li>https://redfish.dmtf.org/</li>
+<li>用途：開發者友善入口；找 schema、工具、教學比較方便</li>
+</ul>
+<h3>Redfish Specification (DSP0266)</h3>
+<ul>
+<li>https://www.dmtf.org/dsp/DSP0266</li>
+<li>用途：協定層與服務行為主規格</li>
+</ul>
+<h3>Redfish Data Model (DSP0268)</h3>
+<ul>
+<li>https://www.dmtf.org/dsp/DSP0268</li>
+<li>用途：schema / data model 主體</li>
+</ul>
+<h3>MCTP Base Specification（從 PMCI 入口進）</h3>
+<ul>
+<li>https://www.dmtf.org/standards/pmci</li>
+<li>用途：補 EID、message/packet、binding 等核心觀念</li>
+</ul>
+<h3>PLDM Base / FRU / Platform Monitoring and Control / FW Update（從 PMCI 入口進）</h3>
+<ul>
+<li>https://www.dmtf.org/standards/pmci</li>
+<li>用途：依需求補對應 Type 規格，先看 Base、FRU、Platform Monitoring、FW Update</li>
+</ul>
+<p>---</p>
+<h2>6. Yocto：只抓 OpenBMC 真正需要的</h2>
+<h3>Yocto docs 入口</h3>
+<ul>
+<li>https://docs.yoctoproject.org/</li>
+<li>用途：官方總文件入口</li>
+</ul>
+<h3>Yocto concepts</h3>
+<ul>
+<li>https://docs.yoctoproject.org/overview-manual/concepts.html</li>
+<li>用途：補 BitBake、recipe、class、config、layer、sstate 的整體概念</li>
+</ul>
+<h3>Yocto devtool</h3>
+<ul>
+<li>https://docs.yoctoproject.org/dev/dev-manual/devtool.html</li>
+<li>用途：快速 patch / 修改 recipe / 匯出修改時很實用</li>
+</ul>
+<h3>BitBake user manual</h3>
+<ul>
+<li>https://docs.yoctoproject.org/bitbake/</li>
+<li>用途：需要追 task、變數、override 行為時查</li>
+</ul>
+<h3>OpenEmbedded Layer Index</h3>
+<ul>
+<li>https://layers.openembedded.org/</li>
+<li>用途：查 layer / recipe 來源與版本</li>
+</ul>
+<p>---</p>
+<h2>7. OpenBMC / Yocto layer 與建置實作</h2>
+<h3>meta-phosphor</h3>
+<ul>
+<li>https://github.com/openbmc/meta-phosphor</li>
+<li>用途：OpenBMC 核心 layer，很多 recipe 會落在這</li>
+</ul>
+<h3>openbmc 主 repo</h3>
+<ul>
+<li>https://github.com/openbmc/openbmc</li>
+<li>用途：看整體 layer 組成、機種設定、subtree 結構</li>
+</ul>
+<h3>meta-openembedded</h3>
+<ul>
+<li>https://github.com/openembedded/meta-openembedded</li>
+<li>用途：很多 OpenBMC recipe 依賴會從這裡來</li>
+</ul>
+<h3>poky</h3>
+<ul>
+<li>https://github.com/yoctoproject/poky</li>
+<li>用途：Yocto 基底發行版與 OE-Core 入口</li>
+</ul>
+<p>---</p>
+<h2>8. Jenkins / CI-CD 官方文件</h2>
+<h3>Jenkins Pipeline</h3>
+<ul>
+<li>https://www.jenkins.io/doc/book/pipeline/</li>
+<li>用途：Jenkinsfile、Declarative/Scripted、best practices</li>
+</ul>
+<h3>Jenkins Shared Libraries</h3>
+<ul>
+<li>https://www.jenkins.io/doc/book/pipeline/shared-libraries/</li>
+<li>用途：多平台/多產品線共用 pipeline 邏輯</li>
+</ul>
+<h3>Jenkins Kubernetes plugin</h3>
+<ul>
+<li>https://plugins.jenkins.io/kubernetes/</li>
+<li>用途：動態 agent pod；Yocto 大 build 很常見</li>
+</ul>
+<h3>Jenkins on Kubernetes</h3>
+<ul>
+<li>https://www.jenkins.io/doc/book/installing/kubernetes/</li>
+<li>用途：若 CI 基礎設施走 k8s，可看部署與運作模式</li>
+</ul>
+<p>---</p>
+<h2>9. 這 1 週建議閱讀順序</h2>
+<h3>第 1 層：先建立地圖</h3>
+<p>1. OpenBMC README  </p>
+<p>2. interface overview  </p>
+<p>3. bmcweb repo  </p>
+<p>4. DMTF Redfish hub</p>
+<h3>第 2 層：補 inside-the-box protocol</h3>
+<p>5. MCTP design  </p>
+<p>6. PLDM stack design  </p>
+<p>7. PMCI standards hub</p>
+<h3>第 3 層：補 build / CI</h3>
+<p>8. Yocto concepts  </p>
+<p>9. Yocto devtool  </p>
+<p>10. Jenkins Pipeline  </p>
+<p>11. Shared Libraries  </p>
+<p>12. Kubernetes plugin</p>
+<p>---</p>
+<h2>10. 如果只留 8 個連結</h2>
+<p>1. OpenBMC interface overview  </p>
+<p>   <a href="https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/architecture/interface-overview.md">https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/architecture/interface-overview.md</a></p>
+<p>2. bmcweb repo  </p>
+<p>   <a href="https://github.com/openbmc/bmcweb">https://github.com/openbmc/bmcweb</a></p>
+<p>3. D-Bus interfaces repo  </p>
+<p>   <a href="https://github.com/openbmc/phosphor-dbus-interfaces">https://github.com/openbmc/phosphor-dbus-interfaces</a></p>
+<p>4. OpenBMC MCTP design  </p>
+<p>   <a href="https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/designs/mctp/mctp.md">https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/designs/mctp/mctp.md</a></p>
+<p>5. OpenBMC PLDM stack design  </p>
+<p>   <a href="https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/designs/pldm-stack.md">https://gerrit.openbmc.org/plugins/gitiles/openbmc/docs/+/master/designs/pldm-stack.md</a></p>
+<p>6. DMTF Redfish hub  </p>
+<p>   <a href="https://www.dmtf.org/standards/redfish">https://www.dmtf.org/standards/redfish</a></p>
+<p>7. Yocto concepts  </p>
+<p>   <a href="https://docs.yoctoproject.org/overview-manual/concepts.html">https://docs.yoctoproject.org/overview-manual/concepts.html</a></p>
+<p>8. Jenkins Pipeline  </p>
+<p>   <a href="https://www.jenkins.io/doc/book/pipeline/">https://www.jenkins.io/doc/book/pipeline/</a></p></body></html>

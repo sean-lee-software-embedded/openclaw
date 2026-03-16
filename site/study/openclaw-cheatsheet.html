@@ -1,0 +1,302 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:920px;margin:0 auto;padding:28px 18px;line-height:1.7;background:#0b1220;color:#e6edf3}a{color:#7cc0ff}h1,h2,h3{color:#fff}pre{background:#111827;padding:14px;border-radius:12px;overflow:auto}code{font-family:ui-monospace,monospace}ul{padding-left:22px}p,li{color:#cbd5e1}</style></head><body><h1>OpenClaw Cheatsheet（繁中實戰速查）</h1>
+<h2>一句話判斷</h2>
+<ul>
+<li>**要想清楚** → 換好 prompt / 模型</li>
+<li>**要真的做事** → 需要工具</li>
+<li>**要穩定重複做** → 需要 skill</li>
+<li>**要在對的地方做** → 需要對 runtime</li>
+</ul>
+<p>---</p>
+<h2>1) 能力分層</h2>
+<h3>Model</h3>
+<p>負責理解、推理、規劃、寫內容。</p>
+<h3>Tool</h3>
+<p>負責真實操作：</p>
+<ul>
+<li>檔案：`read` / `write` / `edit`</li>
+<li>Shell：`exec` / `process`</li>
+<li>GitHub：`gh` 或 API</li>
+<li>瀏覽器：`browser`</li>
+<li>裝置：`nodes`</li>
+<li>排程：`cron`</li>
+<li>子代理：`sessions_spawn`</li>
+</ul>
+<h3>Skill</h3>
+<p>針對任務的 SOP / playbook。</p>
+<h3>Runtime</h3>
+<p>任務在哪裡跑：</p>
+<ul>
+<li>main agent</li>
+<li>subagent</li>
+<li>ACP harness</li>
+<li>gateway host</li>
+<li>device node</li>
+</ul>
+<p>---</p>
+<h2>2) 任務路由速查</h2>
+<h3>小事、一次性、低風險</h3>
+<ul>
+<li>直接 main agent + read/edit/exec</li>
+</ul>
+<h3>複雜任務、需要乾淨上下文</h3>
+<ul>
+<li>用 **subagent**</li>
+</ul>
+<h3>長時間 coding flow、要持續互動 thread</h3>
+<ul>
+<li>用 **ACP harness/runtime**</li>
+</ul>
+<h3>要在手機/電腦本機做事</h3>
+<ul>
+<li>用 **node runtime**</li>
+</ul>
+<h3>要固定時間跑</h3>
+<ul>
+<li>用 **cron**</li>
+</ul>
+<h3>要低頻巡檢、順便看上下文</h3>
+<ul>
+<li>用 **heartbeat**</li>
+</ul>
+<p>---</p>
+<h2>3) 高價值 skills</h2>
+<h3>`coding-agent`</h3>
+<p>用於：</p>
+<ul>
+<li>新功能</li>
+<li>重構</li>
+<li>PR review</li>
+<li>需要探索 repo 的任務</li>
+</ul>
+<p>關鍵：</p>
+<ul>
+<li>Codex / Pi / OpenCode 常要 PTY</li>
+<li>Claude Code 用 `--print --permission-mode bypassPermissions`</li>
+<li>長任務用 background</li>
+<li>`workdir` 要準</li>
+</ul>
+<h3>`github`</h3>
+<p>用於：</p>
+<ul>
+<li>查 PR / issue / CI / logs</li>
+<li>建 issue / 留言 / merge</li>
+</ul>
+<h3>`gh-issues`</h3>
+<p>用於：</p>
+<ul>
+<li>自動抓 issues</li>
+<li>spawn subagents 修復</li>
+<li>開 PR</li>
+<li>追 review comments</li>
+<li>適合 watch / cron 模式</li>
+</ul>
+<h3>`healthcheck`</h3>
+<p>用於：</p>
+<ul>
+<li>OpenClaw 安全 audit</li>
+<li>主機暴露面 / 更新 / firewall / SSH 檢查</li>
+<li>建議定期跑</li>
+</ul>
+<h3>`node-connect`</h3>
+<p>用於：</p>
+<ul>
+<li>iOS / Android / macOS node 配對失敗</li>
+<li>Tailscale / publicUrl / remote gateway / pairing 問題</li>
+</ul>
+<h3>`tmux`</h3>
+<p>用於：</p>
+<ul>
+<li>控制互動式 CLI session</li>
+<li>監控 Claude/Codex 類長任務</li>
+</ul>
+<h3>`session-logs`</h3>
+<p>用於：</p>
+<ul>
+<li>查過去聊天紀錄</li>
+<li>回顧決策脈絡</li>
+<li>做成本 / 工具使用分析</li>
+</ul>
+<h3>`weather`</h3>
+<p>用於：</p>
+<ul>
+<li>heartbeat 裡順手查天氣</li>
+</ul>
+<p>---</p>
+<h2>4) 什麼不是強模型能解決的</h2>
+<h3>單靠模型不行的事</h3>
+<ul>
+<li>讀你本地檔案</li>
+<li>跑測試</li>
+<li>查私有 GitHub</li>
+<li>控制 tmux</li>
+<li>操作手機鏡頭/通知</li>
+<li>做背景排程</li>
+</ul>
+<h3>症狀判斷</h3>
+<ul>
+<li>**回答很像，但沒真的做** → 缺工具</li>
+<li>**工具有了但一直做歪** → 缺 skill</li>
+<li>**看起來會，但做不到那台機器上** → runtime 不對</li>
+<li>**每次都忘記你的偏好** → docs / memory 不足</li>
+</ul>
+<p>---</p>
+<h2>5) 最值得優化的 workspace 檔案</h2>
+<h3>`AGENTS.md`</h3>
+<p>寫：</p>
+<ul>
+<li>可直接做 / 一定要先問的事</li>
+<li>commit / branch / PR 習慣</li>
+<li>回覆風格偏好</li>
+</ul>
+<h3>`TOOLS.md`</h3>
+<p>寫：</p>
+<ul>
+<li>SSH alias</li>
+<li>常用 host / server / 裝置名稱</li>
+<li>路徑與環境特定備註</li>
+</ul>
+<h3>`USER.md`</h3>
+<p>寫：</p>
+<ul>
+<li>你的背景</li>
+<li>決策風格</li>
+<li>偏好輸出格式</li>
+<li>常做任務類型</li>
+</ul>
+<h3>`MEMORY.md`</h3>
+<p>寫：</p>
+<ul>
+<li>長期有效偏好</li>
+<li>穩定流程</li>
+<li>重要教訓</li>
+</ul>
+<h3>`memory/YYYY-MM-DD.md`</h3>
+<p>寫：</p>
+<ul>
+<li>當天進度</li>
+<li>暫時線索</li>
+<li>最近發生的事</li>
+</ul>
+<h3>`HEARTBEAT.md`</h3>
+<p>寫：</p>
+<ul>
+<li>定期要檢查什麼</li>
+<li>什麼情況主動提醒</li>
+<li>什麼情況保持安靜</li>
+</ul>
+<p>---</p>
+<h2>6) Prompt 模板</h2>
+<h3>任務委派模板</h3>
+<pre><code>
+目標：
+
+範圍：
+
+限制：
+
+驗收標準：
+
+回報格式：
+
+</code></pre>
+<h3>範例 1：PR review</h3>
+<pre><code>
+幫我 review 這個 PR。
+
+目標：找 blocker / 風險 / 測試缺口
+
+範圍：只看本 PR 變更
+
+限制：不要改 code
+
+驗收標準：列出 must-fix 與 nice-to-have
+
+回報格式：先摘要，再條列問題
+
+</code></pre>
+<h3>範例 2：repo debug</h3>
+<pre><code>
+幫我在 firmware/ 找 boot timeout 根因。
+
+限制：先分析，不要直接大改
+
+驗收標準：給 root cause、最小修補方案、風險
+
+</code></pre>
+<p>---</p>
+<h2>7) Heartbeat vs Cron</h2>
+<h3>用 Heartbeat</h3>
+<p>適合：</p>
+<ul>
+<li>Email / calendar / weather / GitHub 批次巡檢</li>
+<li>有上下文的低頻主動提醒</li>
+<li>記憶整理</li>
+</ul>
+<h3>用 Cron</h3>
+<p>適合：</p>
+<ul>
+<li>每天固定時間任務</li>
+<li>每小時安全檢查</li>
+<li>固定 repo 掃描</li>
+<li>一次性 reminder</li>
+</ul>
+<h3>快速判斷</h3>
+<ul>
+<li>**需要準時** → cron</li>
+<li>**需要情境感知與批次** → heartbeat</li>
+</ul>
+<p>---</p>
+<h2>8) 遠端接入優先順序</h2>
+<p>1. **Tailscale Serve**</p>
+<p>2. **SSH tunnel**</p>
+<p>3. **公開 URL / Funnel**（真的需要再開）</p>
+<p>原則：</p>
+<ul>
+<li>優先維持 `gateway.bind=loopback`</li>
+<li>先做安全 audit</li>
+<li>公網暴露一定要有 auth</li>
+</ul>
+<p>---</p>
+<h2>9) 你很可能會用到的組合</h2>
+<h3>GitHub 維運組合</h3>
+<ul>
+<li>`github` + `gh-issues` + subagents</li>
+</ul>
+<h3>編碼工作組合</h3>
+<ul>
+<li>`coding-agent` + `tmux` + `process`</li>
+</ul>
+<h3>多裝置組合</h3>
+<ul>
+<li>`node-connect` + nodes + Tailscale</li>
+</ul>
+<h3>長期記憶 / 回顧組合</h3>
+<ul>
+<li>`session-logs` + MEMORY.md + daily memory</li>
+</ul>
+<h3>主動助理組合</h3>
+<ul>
+<li>heartbeat + cron + dashboard/WebChat</li>
+</ul>
+<p>---</p>
+<h2>10) 最佳實踐清單</h2>
+<ul>
+<li>任務大於 5–10 分鐘：丟 subagent 或 background</li>
+<li>repo 任務先說清楚 workdir / 範圍</li>
+<li>把穩定資訊寫進 workspace docs，不要靠模型記住</li>
+<li>需要定期執行的事，不要靠你每次重新提醒</li>
+<li>先決定執行位置，再決定模型</li>
+<li>先決定 access path，再開遠端功能</li>
+</ul>
+<p>---</p>
+<h2>11) 給技術使用者的直白版結論</h2>
+<p>OpenClaw 要變強，不是只升模型，而是：</p>
+<ul>
+<li>文件補全</li>
+<li>skill 用對</li>
+<li>runtime 選對</li>
+<li>tool 開對</li>
+<li>自動化接上</li>
+<li>安全邊界設好</li>
+</ul>
+<p>&gt; 把它當成「可委派的 AI 控制平面」，而不是單純聊天 bot，價值才會真正拉開。</p></body></html>
