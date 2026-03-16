@@ -551,9 +551,39 @@ function seedData() {
         description: 'Build chart components for the analytics dashboard: line chart for trends, pie chart for breakdown.',
         subtasks: [{ id: 'st8', title: 'Line chart component', done: false }, { id: 'st9', title: 'Pie chart component', done: false }, { id: 'st10', title: 'Connect to API', done: false }],
         comments: [],
-        createdAt: new Date(Date.now()-86400000).toISOString(), updatedAt: new Date(Date.now()-86400000).toISOString() }
+        createdAt: new Date(Date.now()-86400000).toISOString(), updatedAt: new Date(Date.now()-86400000).toISOString() },
+      { id: 'i7', key: 'PRJ-7', title: 'Restore board management entry points', type: 'task', status: 'todo',
+        priority: 'Highest', epicId: null, sprintId: null, points: 3, assigneeId: null,
+        parentId: null,
+        description: 'Ensure board has visible, working entry points for Project / Epic / Member management without blocking the main UI.',
+        subtasks: [], comments: [],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 'i8', key: 'PRJ-8', title: 'Convert study links to markdown-first readable flow', type: 'task', status: 'todo',
+        priority: 'High', epicId: null, sprintId: null, points: 2, assigneeId: null,
+        parentId: null,
+        description: 'Make study materials easy to read using markdown-first links and remove broken HTML as the primary path.',
+        subtasks: [], comments: [],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 'i9', key: 'PRJ-9', title: 'Publish readable study packs on GitHub Pages', type: 'story', status: 'todo',
+        priority: 'Highest', epicId: null, sprintId: null, points: 5, assigneeId: null,
+        parentId: null,
+        description: 'Expose OpenBMC, cloud server, and OpenClaw study packs in a way that is easy to review on phone and browser.',
+        subtasks: [], comments: [],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 'i10', key: 'PRJ-10', title: 'Define safe iPhone dashboard access path', type: 'story', status: 'todo',
+        priority: 'High', epicId: null, sprintId: null, points: 5, assigneeId: null,
+        parentId: null,
+        description: 'Decide and document a stable dashboard access path for iPhone, likely via Tailscale or HTTPS instead of LAN HTTP.',
+        subtasks: [], comments: [],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: 'i11', key: 'PRJ-11', title: 'Redesign board persistence for cross-device tracking', type: 'story', status: 'todo',
+        priority: 'High', epicId: null, sprintId: null, points: 8, assigneeId: null,
+        parentId: null,
+        description: 'Replace localStorage-only behavior with a shared ticket source so board changes are visible across devices.',
+        subtasks: [], comments: [],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
     ],
-    _nextIssueNum: 7
+    _nextIssueNum: 12
   };
 }
 
