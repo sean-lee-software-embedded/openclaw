@@ -498,9 +498,10 @@ function seedData() {
       { id: 'e2', name: 'Frontend UI', color: '#a371f7' }
     ],
     members: [
-      { id: 'm1', name: 'Peter', initials: 'PE', color: '#1f6feb' },
-      { id: 'm2', name: 'Alice', initials: 'AL', color: '#3fb950' },
-      { id: 'm3', name: 'Bob', initials: 'BO', color: '#f0883e' }
+      { id: 'm1', name: 'Mica', initials: 'MI', color: '#1f6feb' },
+      { id: 'm2', name: 'Nova', initials: 'NO', color: '#3fb950' },
+      { id: 'm3', name: 'Forge', initials: 'FO', color: '#f0883e' },
+      { id: 'm4', name: 'Shade', initials: 'SH', color: '#a371f7' }
     ],
     sprints: [
       {
@@ -562,25 +563,25 @@ function seedData() {
         priority: 'High', epicId: null, sprintId: 's1', points: 2, assigneeId: null,
         parentId: null,
         description: 'Make study materials easy to read using markdown-first links and remove broken HTML as the primary path.',
-        subtasks: [], comments: [{ id: 'c8001', text: 'Progress: study materials were reorganized to markdown-first flow. Remaining work: clean study landing and make links easier to read on phone/browser.', author: 'Ori', createdAt: new Date().toISOString() }],
+        subtasks: [], comments: [{ id: 'c8001', text: 'Progress: study materials were reorganized to markdown-first flow. Remaining work: clean study landing and make links easier to read on phone/browser.', author: 'Shade', createdAt: new Date().toISOString() }],
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
       { id: 'i9', key: 'PRJ-9', title: 'Publish readable study packs on GitHub Pages', type: 'story', status: 'inprogress',
         priority: 'Highest', epicId: null, sprintId: 's1', points: 5, assigneeId: null,
         parentId: null,
         description: 'Expose OpenBMC, cloud server, and OpenClaw study packs in a way that is easy to review on phone and browser.',
-        subtasks: [], comments: [{ id: 'c8002', text: 'Study packs created: openbmc-pack/openbmc-links, cloud-server-pack/cloud-server-cheatsheet, openclaw-pack/openclaw-cheatsheet. Need cleaner publishing/readability path.', author: 'Ori', createdAt: new Date().toISOString() }],
+        subtasks: [], comments: [{ id: 'c8002', text: 'Study packs created: openbmc-pack/openbmc-links, cloud-server-pack/cloud-server-cheatsheet, openclaw-pack/openclaw-cheatsheet. Need cleaner publishing/readability path.', author: 'Shade', createdAt: new Date().toISOString() }],
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
       { id: 'i10', key: 'PRJ-10', title: 'Define safe iPhone dashboard access path', type: 'story', status: 'inreview',
         priority: 'High', epicId: null, sprintId: 's1', points: 5, assigneeId: null,
         parentId: null,
         description: 'Decide and document a stable dashboard access path for iPhone, likely via Tailscale or HTTPS instead of LAN HTTP.',
-        subtasks: [], comments: [{ id: 'c8003', text: 'Conclusion: recommend Tailscale for safe iPhone dashboard access. LAN HTTP is not a stable/safe control UI path; ngrok should not be used for management UI.', author: 'Ori', createdAt: new Date().toISOString() }],
+        subtasks: [], comments: [{ id: 'c8003', text: 'Conclusion: recommend Tailscale for safe iPhone dashboard access. LAN HTTP is not a stable/safe control UI path; ngrok should not be used for management UI.', author: 'Shade', createdAt: new Date().toISOString() }],
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
       { id: 'i11', key: 'PRJ-11', title: 'Redesign board persistence for cross-device tracking', type: 'story', status: 'todo',
         priority: 'High', epicId: null, sprintId: 's1', points: 8, assigneeId: null,
         parentId: null,
         description: 'Replace localStorage-only behavior with a shared ticket source so board changes are visible across devices.',
-        subtasks: [], comments: [{ id: 'c8004', text: 'Recommendation: move ticket backend to GitHub Issues. Fastest usable path: GitHub Issues + GitHub Action export to issues.json.', author: 'Ori', createdAt: new Date().toISOString() }],
+        subtasks: [], comments: [{ id: 'c8004', text: 'Recommendation: move ticket backend to GitHub Issues. Fastest usable path: GitHub Issues + GitHub Action export to issues.json.', author: 'Shade', createdAt: new Date().toISOString() }],
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
     ],
     _nextIssueNum: 12
@@ -618,15 +619,18 @@ function loadData() {
       'PRJ-10': 'Conclusion: recommend Tailscale for safe iPhone dashboard access. LAN HTTP is not a stable/safe control UI path; ngrok should not be used for management UI.',
       'PRJ-11': 'Recommendation: move ticket backend to GitHub Issues. Fastest usable path: GitHub Issues + GitHub Action export to issues.json.'
     };
-    for (const key in commentMap) {
+    const assigneeMap = { 'PRJ-7':'m4', 'PRJ-8':'m4', 'PRJ-9':'m4', 'PRJ-10':'m1', 'PRJ-11':'m3' };
+    for (const key in assigneeMap) {
       const ex = data.issues.find(i => i.key === key);
-      if (ex) {
-        ex.comments = ex.comments || [];
-        if (!ex.comments.some(c => (c.text||'') === commentMap[key])) {
-          ex.comments.push({ id: 'auto-'+key, text: commentMap[key], author: 'Ori', createdAt: new Date().toISOString() });
-        }
-      }
+      if (ex) ex.assigneeId = assigneeMap[key];
     }
+    const requiredMembers = [
+      { id:'m1', name:'Mica', initials:'MI', color:'#1f6feb' },
+      { id:'m2', name:'Nova', initials:'NO', color:'#3fb950' },
+      { id:'m3', name:'Forge', initials:'FO', color:'#f0883e' },
+      { id:'m4', name:'Shade', initials:'SH', color:'#a371f7' }
+    ];
+    data.members = requiredMembers;
   } catch(e) { data = seedData(); }
 }
 
