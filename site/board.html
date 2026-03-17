@@ -669,7 +669,9 @@ function loadData() {
       'PRJ-8': {status:'inprogress', sprintId:'s1'},
       'PRJ-9': {status:'inprogress', sprintId:'s1'},
       'PRJ-10': {status:'inreview', sprintId:'s1'},
-      'PRJ-11': {status:'todo', sprintId:'s1'}
+      'PRJ-11': {status:'todo', sprintId:'s1'},
+      'PRJ-12': {status:'inprogress', sprintId:'s1'},
+      'PRJ-13': {status:'todo', sprintId:'s1'}
     };
     const seeded = seedData().issues.filter(i => wanted[i.key]);
     const byKey = { ...wanted };
@@ -690,7 +692,7 @@ function loadData() {
       'PRJ-10': 'Conclusion: recommend Tailscale for safe iPhone dashboard access. LAN HTTP is not a stable/safe control UI path; ngrok should not be used for management UI.',
       'PRJ-11': 'Recommendation: move ticket backend to GitHub Issues. Fastest usable path: GitHub Issues + GitHub Action export to issues.json.'
     };
-    const assigneeMap = { 'PRJ-7':'m4', 'PRJ-8':'m4', 'PRJ-9':'m4', 'PRJ-10':'m1', 'PRJ-11':'m3' };
+    const assigneeMap = { 'PRJ-7':'m4', 'PRJ-8':'m4', 'PRJ-9':'m4', 'PRJ-10':'m1', 'PRJ-11':'m3', 'PRJ-12':'m4', 'PRJ-13':'m4' };
     for (const key in assigneeMap) {
       const ex = data.issues.find(i => i.key === key);
       if (ex) ex.assigneeId = assigneeMap[key];
