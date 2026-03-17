@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Three-Lobster Deployment Blueprint</title>
+  <style>
+    :root{--bg:#0b1220;--panel:#121a2b;--panel2:#182236;--text:#edf2ff;--muted:#94a3b8;--accent:#60a5fa;--cyan:#22d3ee;--green:#34d399;--border:#243041}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at top right,#16213b 0,#0b1220 45%,#09101b 100%);color:var(--text)}
+    .wrap{max-width:980px;margin:0 auto;padding:28px 18px 42px}
+    .back{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#a9d3ff;margin-bottom:18px}
+    .hero,.panel{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));border:1px solid var(--border);border-radius:20px;box-shadow:0 12px 40px rgba(0,0,0,.18)}
+    .hero{padding:22px;margin-bottom:18px}
+    h1{margin:0 0 10px;font-size:34px;letter-spacing:-.03em}
+    .sub{color:var(--muted);line-height:1.7;max-width:760px}
+    .status{display:inline-block;margin-top:14px;padding:6px 10px;border-radius:999px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.25);color:#8cecff;font-size:13px;font-weight:700}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+    .panel{padding:18px}
+    h2{margin:0 0 12px;font-size:18px}
+    ul{margin:0;padding-left:18px} li{margin:10px 0;color:var(--muted);line-height:1.6}
+    .steps{display:grid;gap:12px}
+    .step{background:var(--panel2);border:1px solid var(--border);border-radius:16px;padding:14px}
+    .step strong{display:block;margin-bottom:6px;color:var(--text)}
+    .note{margin-top:18px;padding:14px 16px;border-radius:16px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.22);color:#c8f7e3}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#c7d2fe}
+    @media (max-width:860px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="./index.html">← Back to Mission Control</a>
+
+    <section class="hero">
+      <h1>Three-Lobster Deployment Blueprint</h1>
+      <div class="sub">這是一個輕量 placeholder 頁面，先提供 Mission Control 的有效入口。Blueprint v1 正在整理中，之後可直接把正式部署拓樸、角色分工、runbook 與風險清單補進來。</div>
+      <div class="status">Blueprint v1 is being prepared</div>
+    </section>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>目前已知方向</h2>
+        <div class="steps">
+          <div class="step"><strong>Lobster A · Control / Orchestration</strong>負責任務協調、控制平面、入口管理與狀態可視化。</div>
+          <div class="step"><strong>Lobster B · Execution / Services</strong>承接主要服務與工作負載，提供可替換、可擴展的執行層。</div>
+          <div class="step"><strong>Lobster C · Recovery / Guardrail</strong>保留備援、觀測、故障切換與回復能力，降低單點風險。</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>v1 準備中內容</h2>
+        <ul>
+          <li>部署拓樸圖與網路/角色邊界。</li>
+          <li>每隻龍蝦的責任分工、依賴關係與啟動順序。</li>
+          <li>健康檢查、告警、故障切換與回復 runbook。</li>
+          <li>配置項清單，例如 endpoint、secrets 位置與版本策略。</li>
+          <li>驗收條件與 demo/checklist。</li>
+        </ul>
+        <div class="note">如果要先掛正式文件，之後只要把這頁內容替換成完整藍圖，或改成連到正式文檔即可。現階段連結不會是 dead end。</div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
